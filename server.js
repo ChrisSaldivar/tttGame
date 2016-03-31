@@ -6,6 +6,11 @@ var app = express(); //create express object
   res.send('Hello World!');
 });*/
 
+app.post('/auth', function(req, res) {
+	res.sendFile(__dirname + '/public/main.html');
+	console.log('Login Good.');
+});
+
 app.use('/', express.static(__dirname + '/public'));
 
 app.listen(3000, function () { //start listening for activity on port 3000
