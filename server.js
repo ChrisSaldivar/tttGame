@@ -1,4 +1,4 @@
-//hello world server using express beginning of project
+//server using express beginning of project
 var express = require('express');
 var app = express(); //create express object
 
@@ -7,6 +7,13 @@ var app = express(); //create express object
 });*/
 
 app.post('/auth', function(req, res) {
+	//check for valid login
+	res.sendFile(__dirname + '/public/main.html');
+	console.log('Login Good.');
+});
+
+app.post('/newUser', function(req, res) {
+	//check for valid login
 	res.sendFile(__dirname + '/public/main.html');
 	console.log('Login Good.');
 });
