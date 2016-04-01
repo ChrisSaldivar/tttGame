@@ -38,7 +38,6 @@ function generateButtons(){
 function actionOnClick(button){
 	changeFrame(button);
 	var winner = ttt.checkWin();
-	console.log(winner);
 	if (winner !== ""){
         game.add.text(game.world.centerX, game.world.centerY, "winner is: " + winner, { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
@@ -89,12 +88,10 @@ var ttt = {
                 if (this.board[1][1] !== ""){
 					winner = this.board[1][1];
                 }
-		console.log(winner);
 		return winner;
 	},
 	playMove: function(row, col, token){
         var validMove = false;
-        console.log(token);
         if (this.board[row][col] === ""){
 			this.board[row][col] = token;
 			validMove = true;
