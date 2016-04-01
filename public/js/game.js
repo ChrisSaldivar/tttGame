@@ -9,9 +9,10 @@ function preload(){
 var background;
 var currentPlayer = "X";
 var moveNumber = 1;
+var gameOver = false;
 
 function create (){
-
+    gameOver = false;
     background = game.add.tileSprite(0, 0, 800, 600, 'background');
     
 	generateButtons();
@@ -36,21 +37,25 @@ function generateButtons(){
 }
 
 function actionOnClick(button){
-	changeFrame(button);
-	var winner = ttt.checkWin();
-	if (winner === "" && moveNumber == 10){
-        game.add.text(game.world.centerX, game.world.centerY, "It's a tie", { font: "65px Arial", fill: "#ff0044", align: "center" });
-        setTimeout(reset, 3000);
-        moveNumber = 1;
-        currentPlayer = "X";
-	}
-	else if (winner !== ""){
-        game.add.text(game.world.centerX, game.world.centerY, "winner is: " + winner, { font: "65px Arial", fill: "#ff0044", align: "center" });
-        setTimeout(reset, 3000);
-        moveNumber = 1;
-        currentPlayer = "X";
-	}
-	
+    if (!gameOver){
+        changeFrame(button);
+        var winner = ttt.checkWin();
+        if (winner === "" && moveNumber == 10){
+            endGame("It's a tie");
+        }
+        else if (winner !== ""){
+            endGame("winner is: " + winner);
+            
+        }
+    }
+}
+
+function endGame(message){
+    game.add.text(game.world.centerX, game.world.centerY, message, { font: "65px Arial", fill: "#ff0044", align: "center" });
+    setTimeout(reset, 3000);
+    moveNumber = 1;
+    currentPlayer = "X";
+    gameOver = true;
 }
 
 function changeFrame(button){
