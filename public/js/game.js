@@ -20,16 +20,12 @@ function run() {
        background = game.add.tileSprite(0, 0, 700, 500, 'background');
     
 	   generateButtons();
+    }
 
     function preload(){
 	   game.load.spritesheet('button', 'assets/button_spritesheet.png', 105, 90, 3);
 	   game.load.image('background','assets/board.png');
     }
-
-    var background;
-    var currentPlayer = "X";
-    var moveNumber = 1;
-
     
     function generateButtons(){
         var button;
