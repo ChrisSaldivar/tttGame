@@ -2,12 +2,15 @@
 <html>
 	<head>
 		<title> Tic-Tac-Toe </title>
+		<script type="text/javascript" src="js/phaser.min.js"></script>
+	    <script type="text/javascript" src="js/ttt.js"></script>
+	    <script type="text/javascript" src="js/game.js"></script>
 		<link rel = 'stylesheet' type="text/css" href = 'css/main.css'>
 	</head>
 	<body>
-		<div id = 'game'> Game </div>
+		<div id = 'game'> <script type = 'text/javascript'>run()</script></div>
 		<div id = 'textbox'> 
-			Chat: <input id = 'chatText' type = 'text' name = 'inputtext'> <button type = 'button' id='chatButton'> Submit </button>
+			Chat:<br/> <input id = 'chatText' type = 'text' name = 'inputtext'> <button type = 'button' id='chatButton'> Submit </button>
 		</div>
 		<div id = 'chatbox'> Chatbox </div>
 	</body>

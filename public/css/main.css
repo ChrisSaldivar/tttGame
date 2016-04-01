@@ -1,6 +1,9 @@
+#body{
+	background-color: black;
+}
+
 #game{
-	background-color: blue;
-	height: 550px;
+	height: 500px;
 	width: 700px;
 	position:absolute;
 	top:0px;
