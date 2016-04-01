@@ -42,11 +42,13 @@ function actionOnClick(button){
         game.add.text(game.world.centerX, game.world.centerY, "It's a tie", { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
         moveNumber = 1;
+        currentPlayer = "X";
 	}
-	if (winner !== ""){
+	else if (winner !== ""){
         game.add.text(game.world.centerX, game.world.centerY, "winner is: " + winner, { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
         moveNumber = 1;
+        currentPlayer = "X";
 	}
 	
 }
