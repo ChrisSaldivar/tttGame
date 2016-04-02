@@ -40,3 +40,5 @@ var ttt = {
 		return validMove;
 	},
 };
+
+module.exports = ttt;

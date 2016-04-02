@@ -1,7 +1,14 @@
 var ws = new WebSocket('ws://localhost:3000/game');
+var message = ''; //will hold response from server
 ws.onopen = function() {
     ws.send("Connection good.");
 };
+
+ws.onmessage = function(event) {
+    message = event.data;
+    console.log(message);
+    ws.send("Message Recieved.");
+}
 
 ws.onclose = function() {
     ws.send("Connection is closed...");
@@ -11,15 +18,16 @@ function run() {
     var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 
     var background;
-    var currentPlayer = "X";
-    var moveNumber = 1;
+    
     var gameOver = false;
 
     function create (){
+       waitForSocketConnection(ws, function() {ws.send('create')//});
        gameOver = false;
        background = game.add.tileSprite(0, 0, 700, 500, 'background');
     
 	   generateButtons();
+        });
     }
 
     function preload(){
@@ -48,36 +56,63 @@ function run() {
     function actionOnClick(button){
         if (!gameOver){
             changeFrame(button);
-            var winner = ttt.checkWin();
-            if (winner === "" && moveNumber == 10){
-                endGame("It's a tie");
-            }
-            else if (winner !== ""){
-                endGame("winner is: " + winner);
-            
-            }
+            waitForSocketConnection(ws, function() {ws.send("check win")});
+    
+            waitForSocketConnection(ws, function() {
+                message = String(message).split(',');
+                if (message[0] === "tie"){
+                    endGame("It's a tie");
+                }
+                else if (message[0] === "win") {
+                    endGame("winner is: " + message[1]);
+                }
+            });
+            //changeFrame(button);
         }
     }
 
     function endGame(message){
+        gameOver = true;
+        waitForSocketConnection(ws, function() {ws.send("end of game")});
         game.add.text(game.world.centerX, game.world.centerY, message, { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
-        moveNumber = 1;
-        currentPlayer = "X";
-        gameOver = true;
     }
 
     function changeFrame(button){
-        if (ttt.playMove(button.row, button.col, currentPlayer)){
-            var frame = (currentPlayer === "X") ? 1 : 2;
+        waitForSocketConnection(ws, function() {ws.send("play move," + button.row + "," + button.col)//});
+    
+        message = String(message).split(',');
+        if (message[0] === 'true'){
+            var frame = parseInt(message[1]);
+            console.log(frame);
             button.setFrames(frame);
-            currentPlayer = (currentPlayer === "X") ? "O" : "X";
-            moveNumber++;
-	   }
+        }
+        });
     }
 
     function reset(){
-        ttt.reset();
+        waitForSocketConnection(ws, function() {ws.send('reset')
+        console.log('done')
         create();
+        });
     }
+}
+
+// Make the function wait until the connection is made...
+function waitForSocketConnection(socket, callback){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made")
+                if(callback != null){
+                    callback();
+                }
+                return;
+
+            } else {
+                console.log("wait for connection...")
+                waitForSocketConnection(socket, callback);
+            }
+
+        }, 5); // wait 5 milisecond for the connection...
 }

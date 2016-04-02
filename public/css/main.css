@@ -2,14 +2,6 @@
 	background-color: black;
 }
 
-#game{
-	height: 500px;
-	width: 700px;
-	position:absolute;
-	top:0px;
-	left:0px;
-}
-
 #chatText{
 	height: 50px;
 	width:  550px;
