@@ -1,20 +1,23 @@
-var ws = new WebSocket('ws://localhost:3000/game');
+var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
 var message = ''; //will hold response from server
 ws.onopen = function() {
-    ws.send("Connection good.");
+    var msg = {status: "Connection good."};
+    ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
     message = event.data;
-    console.log(message);
-    ws.send("Message Recieved.");
+    console.log("from ws.onmessage: "+message);
+    // var msg = {status: "Message Recieved."};
+    // ws.send(JSON.stringify(msg));
 }
 
 ws.onclose = function() {
-    ws.send("Connection is closed...");
+    var msg = {status: "Connection is closed..."};
+    ws.send(JSON.stringify(msg));
 }
 
-function run() {
+// function run() {
     var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 
     var background;
@@ -22,17 +25,16 @@ function run() {
     var gameOver = false;
 
     function create (){
-       waitForSocketConnection(ws, function() {ws.send('create')//});
-       gameOver = false;
-       background = game.add.tileSprite(0, 0, 700, 500, 'background');
-    
-	   generateButtons();
-        });
+        gameOver = false;
+        background = game.add.tileSprite(0, 0, 700, 500, 'background');
+        
+        generateButtons();
+        
     }
 
     function preload(){
-	   game.load.spritesheet('button', 'assets/button_spritesheet.png', 105, 90, 3);
-	   game.load.image('background','assets/board.png');
+        game.load.spritesheet('button', 'assets/button_spritesheet.png', 105, 90, 3);
+        game.load.image('background','assets/board.png');
     }
     
     function generateButtons(){
@@ -47,7 +49,7 @@ function run() {
                 button.row = j;
                 x += 150;
             }
-            x = 150
+            x = 150;
             y += 150;
         }
     }
@@ -56,55 +58,63 @@ function run() {
     function actionOnClick(button){
         if (!gameOver){
             changeFrame(button);
-            waitForSocketConnection(ws, function() {ws.send("check win")});
+            var msg = {cmd: 'check win'};
+            waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
     
-            waitForSocketConnection(ws, function() {
-                message = String(message).split(',');
-                if (message[0] === "tie"){
-                    endGame("It's a tie");
-                }
-                else if (message[0] === "win") {
-                    endGame("winner is: " + message[1]);
-                }
-            });
+            
+            message = JSON.parse(message);
+            console.log("\nfrom actionOnClick: ",message);
+            endGame(message.result);
+            // if (message[0] === "tie"){
+            //     endGame("It's a tie");
+            // }
+            // else if (message[0] === "win") {
+            //     endGame("winner is: " + message[1]);
+            // }
+            
             //changeFrame(button);
         }
     }
 
     function endGame(message){
         gameOver = true;
-        waitForSocketConnection(ws, function() {ws.send("end of game")});
+        var msg = {cmd: 'end of game'};
+        waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
         game.add.text(game.world.centerX, game.world.centerY, message, { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
     }
 
     function changeFrame(button){
-        waitForSocketConnection(ws, function() {ws.send("play move," + button.row + "," + button.col)//});
-    
-        message = String(message).split(',');
-        if (message[0] === 'true'){
-            var frame = parseInt(message[1]);
-            console.log(frame);
+        var msg = {cmd: 'play move', row: button.row, col: button.col};
+        waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
+        
+        message = JSON.parse(message);
+        console.log("from changeFrame: ",message);
+        if (message.movePlayed === 'true'){
+            var frame = message.buttonFrame;
+            console.log("frame: "+frame);
             button.setFrames(frame);
+            console.log("Frame Change");
         }
-        });
+        // });
     }
 
     function reset(){
-        waitForSocketConnection(ws, function() {ws.send('reset')
+        var msg = {cmd: 'reset'};
+        waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg));
         console.log('done')
         create();
         });
     }
-}
+// }
 
 // Make the function wait until the connection is made...
 function waitForSocketConnection(socket, callback){
-    setTimeout(
-        function () {
+    // setTimeout(
+        // function () {
             if (socket.readyState === 1) {
                 console.log("Connection is made")
-                if(callback != null){
+                if(callback !== null){
                     callback();
                 }
                 return;
@@ -114,5 +124,5 @@ function waitForSocketConnection(socket, callback){
                 waitForSocketConnection(socket, callback);
             }
 
-        }, 5); // wait 5 milisecond for the connection...
+        // }, 5); // wait 5 milisecond for the connection...
 }

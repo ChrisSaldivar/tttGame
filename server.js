@@ -39,6 +39,21 @@ var ttt = {
 		}
 		return validMove;
 	},
+	toString : function(){
+        var os = "\n\n[";
+        for(var i =0; i<3; i++){
+            for (var j=0; j<3; j++){
+                os += this.board[j][i]; 
+                if (j != 2)
+                    os += ", ";
+            }
+            os += "]\n"; 
+            if (i != 2)
+                os+="[";
+        }
+        os += "\n\n"
+        return os;
+	}
 };
 
 //server using express beginning of project
@@ -67,49 +82,68 @@ app.ws('/game', function(ws, req) { //socket route for game requests
     //
 
 	ws.on('message', function(msg) {
-		msg = msg.split(',');
-		console.log(msg[0]);
-		console.log(moveNumber);
-		console.log(currentPlayer);
-		if (msg[0] === 'play move'){
-			buttonRow    = msg[1];
-			buttonCol    = msg[2];
+// 		msg = msg.split(',');
+// 		console.log("msg[0]: "+msg[0]);
+		console.log("moveNum: "+moveNumber);
+		console.log("currPlayer: "+currentPlayer);
+		
+		msg = JSON.parse(msg);
+		if (msg.status){
+            console.log("Status: " + msg.status);
+		}
+		else if (msg.cmd === 'play move'){
+            console.log("\n\n\nINSIDE PLAY MOVE\n\n\n");
+			buttonRow    = msg.row;
+			buttonCol    = msg.col;
 			if (ttt.playMove(buttonRow, buttonCol, currentPlayer)){
-				console.log(buttonRow,buttonCol);
+				console.log("(row, col): "+ "("+buttonRow+", "+buttonCol+")");
 
-            	var frame = (currentPlayer === "X") ? 1 : 2;
-				console.log('frame:'+ frame);
-				ws.send('true,' + frame);
+                var frame = (currentPlayer === "X") ? 1 : 2;
+				console.log('frame: '+ frame);
+				msg = {movePlayed: true, buttonFrame: frame};
+				ws.send(JSON.stringify(msg));
 				currentPlayer = (currentPlayer === "X") ? "O" : "X";
 				moveNumber++;
-	    	}
+            }
+            else{
+                msg = {movePlayed: false};
+                ws.send(JSON.stringify(msg));
+            }
+            console.log(ttt.toString());
 		}
-		else if (msg[0] === 'check win'){
+		else if (msg.cmd === 'check win'){
 			var winner = ttt.checkWin();
 			console.log('winner' + winner);
+			msg = {result: ""};
             if (winner === "" && moveNumber == 10){
-                ws.send('tie');
+                msg.result = 'It\'s a tie';
+                ws.send(JSON.stringify(msg));
             }
             else if (winner !== ""){
-            	ws.send('win,'+ winner);
+                msg.result = 'Winner is: ' + winner;
+                ws.send(JSON.stringify(msg));
+            }
+            else{
+                msg.result = "";
+                ws.send(JSON.stringify(msg));
             }
 		}
-		else if (msg[0] === 'end of game'){
+		else if (msg.cmd === 'end of game'){
 			moveNumber = 1;
-        	currentPlayer = "X";
-        	gameOver = true;
+            currentPlayer = "X";
+            gameOver = true;
 		}
-		else if (msg[0] === 'reset'){
+		else if (msg.cmd === 'reset'){
 			ttt.reset();
-		}
-		else if (msg[0] === 'get frame'){
-			var frame = (currentPlayer === "X") ? 1 : 2;
-			console.log('frame:'+ frame);
-			ws.send(frame.toString());
-		}
-		else if (msg[0] === 'create'){
+			moveNumber = 1;
+			currentPlayer = "X";
 			gameOver = false;
 		}
+//      else if (msg.cmd === 'get frame'){
+//             var frame = (currentPlayer === "X") ? 1 : 2;
+//             console.log('frame:'+ frame);
+//             ws.send(frame.toString());
+//      }
 	});
 	console.log('socket', req.testing);
 });
