@@ -1,13 +1,29 @@
-var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+var ws = new WebSocket('ws://localhost:3000/game');
 var message = ''; //will hold response from server
+
 ws.onopen = function() {
     var msg = {status: "Connection good."};
     ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
-    message = event.data;
+    
+    message = JSON.parse(event.data);
     console.log("from ws.onmessage: "+message);
+    if (message.type === 'play move') {
+        console.log("from changeFrame: ",message);
+        if (message.movePlayed === 'true'){
+            var frame = message.buttonFrame;
+            console.log("frame: "+frame);
+            button.setFrames(frame);
+            console.log("Frame Change");
+        }
+    }
+    if (message.type === 'check win'){
+        console.log("\nfrom actionOnClick: ",message);
+        endGame(message.result);
+        changeFrame(button);
+    }
     // var msg = {status: "Message Recieved."};
     // ws.send(JSON.stringify(msg));
 }
@@ -17,7 +33,7 @@ ws.onclose = function() {
     ws.send(JSON.stringify(msg));
 }
 
-// function run() {
+ function run() {
     var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 
     var background;
@@ -57,14 +73,16 @@ ws.onclose = function() {
 
     function actionOnClick(button){
         if (!gameOver){
-            changeFrame(button);
+            //changeFrame(button);
             var msg = {cmd: 'check win'};
             waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
     
             
-            message = JSON.parse(message);
+            /*waitForSocketConnection(ws, function() {message = JSON.parse(message)});
             console.log("\nfrom actionOnClick: ",message);
             endGame(message.result);
+
+            changeFrame(button);*/
             // if (message[0] === "tie"){
             //     endGame("It's a tie");
             // }
@@ -72,7 +90,6 @@ ws.onclose = function() {
             //     endGame("winner is: " + message[1]);
             // }
             
-            //changeFrame(button);
         }
     }
 
@@ -88,7 +105,7 @@ ws.onclose = function() {
         var msg = {cmd: 'play move', row: button.row, col: button.col};
         waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
         
-        message = JSON.parse(message);
+        /*message = JSON.parse(message);
         console.log("from changeFrame: ",message);
         if (message.movePlayed === 'true'){
             var frame = message.buttonFrame;
@@ -96,22 +113,25 @@ ws.onclose = function() {
             button.setFrames(frame);
             console.log("Frame Change");
         }
-        // });
+        // });*/
     }
 
     function reset(){
         var msg = {cmd: 'reset'};
-        waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg));
-        console.log('done')
-        create();
+        waitForSocketConnection(ws, function() {
+            ws.send(JSON.stringify(msg));
+            console.log('done');
+            create();
         });
     }
-// }
+ }
+
+window.onload = run;
 
 // Make the function wait until the connection is made...
 function waitForSocketConnection(socket, callback){
-    // setTimeout(
-        // function () {
+     setTimeout(
+         function () {
             if (socket.readyState === 1) {
                 console.log("Connection is made")
                 if(callback !== null){
@@ -124,5 +144,5 @@ function waitForSocketConnection(socket, callback){
                 waitForSocketConnection(socket, callback);
             }
 
-        // }, 5); // wait 5 milisecond for the connection...
+         }, 5); // wait 5 milisecond for the connection...
 }

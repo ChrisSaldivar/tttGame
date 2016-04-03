@@ -88,6 +88,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 		console.log("currPlayer: "+currentPlayer);
 		
 		msg = JSON.parse(msg);
+
 		if (msg.status){
             console.log("Status: " + msg.status);
 		}
@@ -100,13 +101,13 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 
                 var frame = (currentPlayer === "X") ? 1 : 2;
 				console.log('frame: '+ frame);
-				msg = {movePlayed: true, buttonFrame: frame};
+				msg = {movePlayed: true, buttonFrame: frame, type: 'play move'};
 				ws.send(JSON.stringify(msg));
 				currentPlayer = (currentPlayer === "X") ? "O" : "X";
 				moveNumber++;
             }
             else{
-                msg = {movePlayed: false};
+                msg = {movePlayed: false, type: 'play move'};
                 ws.send(JSON.stringify(msg));
             }
             console.log(ttt.toString());
@@ -114,7 +115,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 		else if (msg.cmd === 'check win'){
 			var winner = ttt.checkWin();
 			console.log('winner' + winner);
-			msg = {result: ""};
+			msg = {result: "", type: 'check win'};
             if (winner === "" && moveNumber == 10){
                 msg.result = 'It\'s a tie';
                 ws.send(JSON.stringify(msg));
@@ -139,11 +140,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 			currentPlayer = "X";
 			gameOver = false;
 		}
-//      else if (msg.cmd === 'get frame'){
-//             var frame = (currentPlayer === "X") ? 1 : 2;
-//             console.log('frame:'+ frame);
-//             ws.send(frame.toString());
-//      }
+        /*else if (msg.cmd === 'get frame'){
+               var frame = (currentPlayer === "X") ? 1 : 2;
+               console.log('frame:'+ frame);
+               msg = {'frame':frame, type: 'frame'};
+               ws.send(JSON.stringify(msg));
+        }*/
 	});
 	console.log('socket', req.testing);
 });
