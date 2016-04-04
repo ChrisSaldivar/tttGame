@@ -96,39 +96,56 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             console.log("\n\n\nINSIDE PLAY MOVE\n\n\n");
 			buttonRow    = msg.row;
 			buttonCol    = msg.col;
+			
+			// Attempt to play the move
 			if (ttt.playMove(buttonRow, buttonCol, currentPlayer)){
 				console.log("(row, col): "+ "("+buttonRow+", "+buttonCol+")");
-
                 var frame = (currentPlayer === "X") ? 1 : 2;
 				console.log('frame: '+ frame);
-				msg = {movePlayed: true, buttonFrame: frame, type: 'play move'};
-				ws.send(JSON.stringify(msg));
+				msg = {movePlayed: true, buttonFrame: frame};
 				currentPlayer = (currentPlayer === "X") ? "O" : "X";
 				moveNumber++;
+				
             }
             else{
-                msg = {movePlayed: false, type: 'play move'};
-                ws.send(JSON.stringify(msg));
+                msg = {movePlayed: false};
             }
-            console.log(ttt.toString());
-		}
-		else if (msg.cmd === 'check win'){
-			var winner = ttt.checkWin();
-			console.log('winner' + winner);
-			msg = {result: "", type: 'check win'};
-            if (winner === "" && moveNumber == 10){
-                msg.result = 'It\'s a tie';
+            
+            // Check if game is over and report results
+            if (msg.movePlayed){
+                var winner = ttt.checkWin();
+                msg.gameOver = false;
+                if (winner === "" && moveNumber == 10){
+                    msg.result   = 'It\'s a tie';
+                    msg.gameOver = true;
+                }
+                else if (winner !== ""){
+                    msg.result = 'Winner is: ' + winner;
+                    msg.gameOver = true;
+                }
                 ws.send(JSON.stringify(msg));
-            }
-            else if (winner !== ""){
-                msg.result = 'Winner is: ' + winner;
-                ws.send(JSON.stringify(msg));
-            }
-            else{
-                msg.result = "";
-                ws.send(JSON.stringify(msg));
+                
+                console.log(ttt.toString());
             }
 		}
+		
+// 		else if (msg.cmd === 'check win'){
+// 			var winner = ttt.checkWin();
+// 			console.log('winner' + winner);
+// 			msg = {result: "", type: 'check win'};
+//             if (winner === "" && moveNumber == 10){
+//                 msg.result = 'It\'s a tie';
+//                 ws.send(JSON.stringify(msg));
+//             }
+//             else if (winner !== ""){
+//                 msg.result = 'Winner is: ' + winner;
+//                 ws.send(JSON.stringify(msg));
+//             }
+//             else{
+//                 msg.result = "";
+//                 ws.send(JSON.stringify(msg));
+//             }
+// 		}
 		else if (msg.cmd === 'end of game'){
 			moveNumber = 1;
             currentPlayer = "X";
