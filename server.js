@@ -105,6 +105,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 clients.push(ws);
                 ws.send(JSON.stringify(firstConnectRes));
             }
+            else{
+                var spectatorRes = {id: "spectator"};
+                clients.push(ws);
+                ws.send(JSON.stringify(spectatorRes));
+            }
 		}
 		else if (msg.cmd === 'play move'){
 			buttonRow    = msg.row;
@@ -166,6 +171,9 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 console.log("other: ",other);
                 clients[0].send(JSON.stringify(other));
             }
+            for (var i = 2; i < clients.length; i++){
+                clients[i].send(JSON.stringify(other));
+            }
             
 		}
 		function reset(){
@@ -175,7 +183,6 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             ttt.reset();
 		}
 	});
-// 	console.log('socket', req.testing);
 });
 
 app.use('/', express.static(__dirname + '/public')); //route to serve static login page

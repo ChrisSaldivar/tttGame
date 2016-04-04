@@ -4,7 +4,7 @@ var id;
 var buttons = [];
 var text;
 
-var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+var ws = new WebSocket('ws://uckk7ec065b1.chrisds.koding.io:3000/game');
 var message = ''; //will hold response from server
 
 ws.onopen = function() {
