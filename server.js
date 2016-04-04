@@ -56,10 +56,21 @@ var ttt = {
 	}
 };
 
+//var mongoose    = require('mongoose');  //will be our orm for database
+//var db          = mongoose.connect('mongodb://localhost:3000/users');
+
+
+
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
+var passport    = require('passport'); //used for user authentication
+var session     = require('express-session'); //used for user sessions
+var flash       = require('connect-flash'); //used for flashing messages to clients
+var cookieParser= require('cookie-parser'); //used to read cookies
+
+
 var gameStarted = false;
 var clients = [];
 
