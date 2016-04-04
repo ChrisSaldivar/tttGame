@@ -1,3 +1,5 @@
+var start;
+
 var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
 var message = ''; //will hold response from server
 
@@ -7,7 +9,8 @@ ws.onopen = function() {
 };
 
 ws.onmessage = function(event) {
-    
+    var end = window.performance.now();
+    console.log("time: " + (end-start));
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
     changeFrame(message);
@@ -62,6 +65,7 @@ ws.onclose = function() {
         if (!gameOver){
             buttonClicked = button;
             var msg = {cmd: 'play move', row: button.row, col: button.col};
+            start = window.performance.now();
             waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
             
         }
