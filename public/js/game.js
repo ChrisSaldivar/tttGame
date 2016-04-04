@@ -16,16 +16,17 @@ ws.onmessage = function(event) {
     messageRecieved = true;
     var end = window.performance.now();
     // console.log("time: " + (end-start));
-    console.log(event.data);
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
     if (message.id){
         id = message.id;
-        console.log(id);
     }
     else if(message.update){
         console.log("index: "+message.buttonIndex);
-        buttons[message.buttonIndex].frame = message.buttonFrame;
+        var frame = message.buttonFrame;
+        console.log("frame is: "+ frame);
+        // console.log("typeof frame: "+typeof frame);
+        buttons[message.buttonIndex].frame = frame;
         if (message.gameOver){
             endGame(message.result);
         }
@@ -99,12 +100,12 @@ ws.onclose = function() {
 
     function changeFrame(message){
         
-        console.log("from changeFrame: ",message);
+        // console.log("from changeFrame: ",message);
         if (message.movePlayed){
             var frame = message.buttonFrame;
             console.log("frame: "+frame);
             buttonClicked.frame = frame;
-            console.log("Frame Change");
+            // console.log("Frame Change");
         }
         
     }
