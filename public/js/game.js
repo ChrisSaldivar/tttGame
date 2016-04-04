@@ -71,8 +71,8 @@ ws.onclose = function() {
         for (var i = 0; i < 3; i++){
             for (var j=0; j<3; j++){
                 button = game.add.button(x, y, 'button', actionOnClick, this);
-                button.col = i;
-                button.row = j;
+                button.col = j;
+                button.row = i;
                 buttons.push(button);
                 x += 150;
             }
