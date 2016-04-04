@@ -1,21 +1,40 @@
 var start;
+var messageRecieved = true;
+var id;
+var buttons = [];
+var text;
 
 var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
 var message = ''; //will hold response from server
 
 ws.onopen = function() {
-    var msg = {status: "Connection good."};
+    var msg = {status: "Connection good.", firstConnection: true};
     ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
+    messageRecieved = true;
     var end = window.performance.now();
-    console.log("time: " + (end-start));
+    // console.log("time: " + (end-start));
+    console.log(event.data);
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
-    changeFrame(message);
-    if (message.gameOver)
-        endGame(message);
+    if (message.id){
+        id = message.id;
+        console.log(id);
+    }
+    else if(message.update){
+        console.log("index: "+message.buttonIndex);
+        buttons[message.buttonIndex].frame = message.buttonFrame;
+        if (message.gameOver){
+            endGame(message.result);
+        }
+    }
+    else{
+        changeFrame(message);
+        if (message.gameOver)
+            endGame(message);
+    }
 };
 
 ws.onclose = function() {
@@ -51,9 +70,9 @@ ws.onclose = function() {
         for (var i = 0; i < 3; i++){
             for (var j=0; j<3; j++){
                 button = game.add.button(x, y, 'button', actionOnClick, this);
-                button.name = "Button " + (j + 3*i + 1);
                 button.col = i;
                 button.row = j;
+                buttons.push(button);
                 x += 150;
             }
             x = 150;
@@ -62,10 +81,11 @@ ws.onclose = function() {
     }
 
     function actionOnClick(button){
-        if (!gameOver){
+        if (!gameOver && messageRecieved){
             buttonClicked = button;
-            var msg = {cmd: 'play move', row: button.row, col: button.col};
+            var msg = {cmd: 'play move', row: button.row, col: button.col, playerId: id};
             start = window.performance.now();
+            messageRecieved = false;
             waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
             
         }
@@ -73,7 +93,7 @@ ws.onclose = function() {
 
     function endGame(message){
         gameOver = true;
-        game.add.text(game.world.centerX, game.world.centerY, message.result, { font: "65px Arial", fill: "#ff0044", align: "center" });
+        text = game.add.text(game.world.centerX, game.world.centerY, message, { font: "65px Arial", fill: "#ff0044", align: "center" });
         setTimeout(reset, 3000);
     }
 
@@ -83,13 +103,14 @@ ws.onclose = function() {
         if (message.movePlayed){
             var frame = message.buttonFrame;
             console.log("frame: "+frame);
-            buttonClicked.setFrames(frame);
+            buttonClicked.frame = frame;
             console.log("Frame Change");
         }
         
     }
 
     function reset(){
+        buttons = Array();
         create();
     }
 //  }

@@ -60,6 +60,7 @@ var ttt = {
 var express   = require('express');
 var app       = express(); //create express object
 var expressWs = require('express-ws')(app); //create express websocket extension
+var clients = [];
 
 app.post('/auth', function(req, res) { //route for checking user login
 	//check for valid login
@@ -73,61 +74,104 @@ app.post('/newUser', function(req, res) { //route for checking new user login
 	console.log('Login Good.');
 });
 
+var currentPlayer  = {id: "player1", token: "X"};
+var previousPlayer = {id: "player2", token: "O"};
+var moveNumber = 1;
+var player = 1;
+
 app.ws('/game', function(ws, req) { //socket route for game requests
 
 	//for game
-	var currentPlayer = "X";
-    var moveNumber = 1;
-    //
-
 	ws.on('message', function(msg) {
+        var res = {
+            movePlayed:  false,
+            buttonFrame: -1,
+            gameOver:    false,
+            result:      ""
+        };
+        var other = {
+            buttonIndex: -1,
+            update:      false,
+            buttonFrame: -1,
+            gameOver:    false
+        };
         console.log("message recieved");
 		msg = JSON.parse(msg);
 
 		if (msg.status){
             console.log("Status: " + msg.status);
+            if (msg.firstConnection && player < 3){
+                var firstConnectRes = {id: "player" + player++};
+                clients.push(ws);
+                ws.send(JSON.stringify(firstConnectRes));
+            }
 		}
 		else if (msg.cmd === 'play move'){
 			buttonRow    = msg.row;
 			buttonCol    = msg.col;
-			var res = {};
+			index        = buttonCol * 3 + buttonRow;
+			other.buttonIndex = index;
 			// Attempt to play the move
-			if (ttt.playMove(buttonRow, buttonCol, currentPlayer)){
+			if (msg.playerId === currentPlayer.id && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
 				// console.log("(row, col): "+ "("+buttonRow+", "+buttonCol+")");
-                var frame = (currentPlayer === "X") ? 1 : 2;
+                var frame = (currentPlayer.token === "X") ? 1 : 2;
 				// console.log('frame: '+ frame);
-				res = {movePlayed: true, buttonFrame: frame};
-				currentPlayer = (currentPlayer === "X") ? "O" : "X";
+				res.movePlayed = true;
+				res.buttonFrame = frame;
+				var temp = currentPlayer;
+				currentPlayer = previousPlayer;
+				previousPlayer = temp;
 				moveNumber++;
-				
+				console.log("currentPlayer: ",currentPlayer);
             }
             else{
-                res = {movePlayed: false};
+                res.movePlayed = false;
             }
             
             // Check if game is over and report results
+            console.log("MOVE PLAYED ",res.movePlayed === true);
             if (res.movePlayed){
+                console.log("in here");
+                other.buttonFrame = res.buttonFrame;
+                other.update = true;
                 var winner = ttt.checkWin();
                 res.gameOver = false;
                 if (winner === "" && moveNumber == 10){
                     res.result   = 'It\'s a tie';
-                    res.gameOver = true;
+                    other.gameOver = true;
+                    other.result = res.result;
+                    res = other;
                     reset();
                 }
                 else if (winner !== ""){
                     res.result = 'Winner is: ' + winner;
-                    res.gameOver = true;
+                    other.gameOver = true;
+                    other.result = res.result;
+                    res = other;
                     reset();
                 }
                 
             }
             console.log(ttt.toString());
-            ws.send(JSON.stringify(res));
+            
+            if (previousPlayer.id === 'player1'){
+                console.log("res: ",res);
+                clients[0].send(JSON.stringify(res));
+                console.log("other: ",other);
+                clients[1].send(JSON.stringify(other));
+            }
+            else{
+                console.log("res: ",res);
+                clients[1].send(JSON.stringify(res));
+                console.log("other: ",other);
+                clients[0].send(JSON.stringify(other));
+            }
             
 		}
 		function reset(){
             moveNumber = 1;
-            currentPlayer = "X";
+            currentPlayer  = {id: "player1", token: "X"};
+            previousPlayer = {id: "player2", token: "O"};
             ttt.reset();
 		}
 	});
