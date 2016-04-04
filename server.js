@@ -43,7 +43,7 @@ var ttt = {
         var os = "\n\n[";
         for(var i =0; i<3; i++){
             for (var j=0; j<3; j++){
-                os += this.board[j][i]; 
+                os += this.board[i][j]; 
                 if (j != 2)
                     os += ", ";
             }
@@ -111,11 +111,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 		else if (msg.cmd === 'play move'){
 			buttonRow    = msg.row;
 			buttonCol    = msg.col;
-			index        = buttonCol * 3 + buttonRow;
+			index        = buttonRow * 3 + buttonCol;
+            console.log("(row, col): "+ "("+buttonRow+", "+buttonCol+")");
 			res.buttonIndex = index;
 			// Attempt to play the move
 			if (msg.playerId === currentPlayer.id && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
-				// console.log("(row, col): "+ "("+buttonRow+", "+buttonCol+")");
+                gameStarted = true;
                 var frame = (currentPlayer.token === "X") ? 1 : 2;
 				// console.log('frame: '+ frame);
 				res.update = true;
@@ -142,7 +143,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 }
                 
             }
-            // console.log(ttt.toString());
+            console.log(ttt.toString());
             console.log("\n\n",res,"\n\n");
             
             for (var i = 0; i < clients.length; i++){
@@ -154,6 +155,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             moveNumber = 1;
             currentPlayer  = {id: "player1", token: "X"};
             previousPlayer = {id: "player2", token: "O"};
+            gameStarted = false;
             ttt.reset();
 		}
 	});
