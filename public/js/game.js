@@ -20,21 +20,25 @@ ws.onmessage = function(event) {
     console.log("from ws.onmessage: ",message);
     if (message.id){
         id = message.id;
+        if (message.gameStarted){
+            console.log("GAME STARTED ALREADY");
+            for (var i=0; i<message.pastMoves.length; i++){
+                // console.log("button index: ",message.pastMoves[i].buttonIndex);
+                // console.log("frame is: ",message.pastMoves[i].buttonFrame);
+                buttons[message.pastMoves[i].buttonIndex].frame = message.pastMoves[i].buttonFrame;
+            }
+        }
     }
     else if(message.update){
         console.log("index: "+message.buttonIndex);
-        var frame = message.buttonFrame;
-        console.log("frame is: "+ frame);
+        var aFrame = message.buttonFrame;
+        // console.log("frame is: "+ frame);
         // console.log("typeof frame: "+typeof frame);
-        buttons[message.buttonIndex].frame = frame;
+        buttons[message.buttonIndex].frame = aFrame;
+        // console.log(buttons[message.buttonIndex]);
         if (message.gameOver){
             endGame(message.result);
         }
-    }
-    else{
-        changeFrame(message);
-        if (message.gameOver)
-            endGame(message);
     }
 };
 
