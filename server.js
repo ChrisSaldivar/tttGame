@@ -60,35 +60,75 @@ var ttt = {
 
 var sqlite3 = require("sqlite3").verbose();
 var db = new sqlite3.Database('users.db'); //open or create database
-db.close();
+//db.close();
+
 
 //set up sequelize for orm
 var Sequelize = require('sequelize');
 var db = new Sequelize('sqlite://' + __dirname + "/users.db");
+//var db = new Sequelize(__dirname + "/users.db", 'clay',null,{dialect: 'sqlite'});
 var Users = db.import(__dirname + "/public/sequelize_models.js");
-Users.sync(); //create table
+Users.schema('test');
+Users.sync({force:true}); //create table
 
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
-var passport    = require('passport'); //used for user authentication
+var passport    = require('passport', LocalStrategy = require('passport-local').Strategy); //used for user authentication
 var session     = require('express-session'); //used for user sessions
 var flash       = require('connect-flash'); //used for flashing messages to clients
 var cookieParser= require('cookie-parser'); //used to read cookies
-
+var bodyParser  = require('body-parser');   //used to gather form data
+var jwt         = require('jsonwebtoken');  //used to create json web tokens
+var passwordHash = require('password-hash');
 
 var gameStarted = false;
 var clients = [];
 
+//test
+Users.create({
+		token: 0,
+		username: 'billy',
+		password: 'pass',
+		wins: 0,
+		losses: 0
+	}).then(function(user){
+		console.log('create');
+	})
+//
+
+// in latest body-parser use like below.
+app.use(bodyParser());
+app.use(require('express-method-override')('method_override_param_name'));
+
 app.post('/auth', function(req, res) { //route for checking user login
 	//check for valid login
+	var valid = false;
+	console.log(req.body.user);
+	console.log(req.body.pass);
+	var user = req.body.user;
+	var pass = passwordHash.generate(req.body.pass);
+
+	//test
+	Users.find({where: {username: user}}).then(function(pass) {
+		console.log(pass);
+	});
+	//
+
 	res.sendFile(__dirname + '/public/main.html');
 	console.log('Login Good.');
 });
 
 app.post('/newUser', function(req, res) { //route for checking new user login
 	//check for valid login
+	console.log(req.body.user);
+	console.log(req.body.pass);
+
+	//test
+
+	//
+
 	res.sendFile(__dirname + '/public/main.html');
 	console.log('Login Good.');
 });

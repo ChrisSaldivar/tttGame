@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes){
    return db.define('users', { //create table model
 	token: {
 		type:      Sequelize.INTEGER,
-		allowNull: false,
+		//allowNull: false,
 		get:       function() {
 			var id = this.getDataValue('id');
 			return id;
@@ -39,7 +39,7 @@ module.exports = function(sequelize, DataTypes){
 	},
 	wins:     {
 		type:      Sequelize.INTEGER,
-		allowNull: false,
+		//allowNull: false,
 		get:       function() {
 			var wins = this.getDataValue('wins');
 			return wins;
@@ -50,7 +50,7 @@ module.exports = function(sequelize, DataTypes){
 	},
 	losses:   {
 		type:      Sequelize.INTEGER,
-		allowNull: false,
+		//allowNull: false,
 		get:       function() {
 			var losses = this.getDataValue('losses');
 			return losses;
