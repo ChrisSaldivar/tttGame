@@ -5,8 +5,8 @@ var buttons = [];
 var text;
 var canPlay = true;
 
-//var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-var ws = new WebSocket('ws://localhost:3000/game');
+var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+// var ws = new WebSocket('ws://localhost:3000/game');
 var message = ''; //will hold response from server
 
 function elt(id){
@@ -48,7 +48,8 @@ ws.onmessage = function(event) {
 function postMessage (){
     // console.log("clicked");
     var text = elt("chatText").value;
-    text = text.replace(/\r?\n/g, '\n');
+    elt("chatText").value = "";
+    text = text.replace(/\r?\n/g, '<br>');
     var msg  = {cmd: "post message", value: text};
     ws.send(JSON.stringify(msg));
 }
@@ -66,12 +67,11 @@ function addChatMessage (message){
     var messageList = elt("chat-list");
     
     var new_message = elt('message-template').content.cloneNode(true);
-    new_message.querySelector(".message-text").textContent = message.value;
+    new_message.querySelector(".message-text").innerHTML = message.value;
     
     messageList.appendChild(new_message);
     
     if(message.value !== ""){
-        elt("chatText").value = "";
         elt("chatText").focus();
     }
     messageList.scrollTop = messageList.scrollHeight;
