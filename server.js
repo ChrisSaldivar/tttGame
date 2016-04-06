@@ -56,10 +56,28 @@ var ttt = {
 	}
 };
 
+//create database and necessities for database
+
+var sqlite3 = require("sqlite3").verbose();
+var db = new sqlite3.Database('users.db'); //open or create database
+db.close();
+
+//set up sequelize for orm
+var Sequelize = require('sequelize');
+var db = new Sequelize('sqlite://' + __dirname + "/users.db");
+var Users = db.import(__dirname + "/public/sequelize_models.js");
+Users.sync(); //create table
+
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
+var passport    = require('passport'); //used for user authentication
+var session     = require('express-session'); //used for user sessions
+var flash       = require('connect-flash'); //used for flashing messages to clients
+var cookieParser= require('cookie-parser'); //used to read cookies
+
+
 var gameStarted = false;
 var clients = [];
 
