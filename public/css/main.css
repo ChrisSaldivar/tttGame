@@ -20,11 +20,18 @@
 	top:550px;
 }
 
-#chatbox{
+#chat-list{
+    overflow: auto;
 	background-color: tan;
 	height: 600px;
 	width: 600px;
 	position:absolute;
 	top: 0px;
 	left:700px;
+}
+
+.message-wrapper {
+    border: 1px solid  grey;
+    height: 200px;
+    width: 200px;
 }

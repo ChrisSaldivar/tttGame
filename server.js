@@ -71,6 +71,7 @@ var Users = db.import(__dirname + "/public/sequelize_models.js");
 Users.schema('test');
 Users.sync({force:true}); //create table
 
+
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
@@ -135,8 +136,14 @@ app.post('/newUser', function(req, res) { //route for checking new user login
 
 var currentPlayer  = {id: "player1", token: "X"};
 var previousPlayer = {id: "player2", token: "O"};
-var moveNumber = 1;
-var player = 1;
+var moveNumber     = 1;
+var player         = 1;
+var pastMoves      = Array();
+
+function Move (frame, index){
+    this.buttonFrame = frame;
+    this.buttonIndex = index;
+}
 
 app.ws('/game', function(ws, req) { //socket route for game requests
 
@@ -151,16 +158,25 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         };
         console.log("message recieved");
 		msg = JSON.parse(msg);
-
-		if (msg.status){
+		
+        if (msg.cmd === 'post message'){
+            sendChatMessage(msg);
+        }
+		else if (msg.status){
             console.log("Status: " + msg.status);
             if (msg.firstConnection){
                 if (player < 3){
                     var firstConnectRes = {id: "player" + player++};
+                    console.log(firstConnectRes.id, "has joined");
                     ws.send(JSON.stringify(firstConnectRes));
                 }
                 else{
                     var spectatorRes = {id: "spectator"};
+                    console.log(spectatorRes.id,"has joined");
+                    if (gameStarted){
+                        spectatorRes.pastMoves   = pastMoves;
+                        spectatorRes.gameStarted = gameStarted;
+                    }
                     ws.send(JSON.stringify(spectatorRes));
                 }
                 clients.push(ws);
@@ -176,6 +192,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 			if (msg.playerId === currentPlayer.id && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
                 gameStarted = true;
                 var frame = (currentPlayer.token === "X") ? 1 : 2;
+                pastMoves.push(new Move(frame, index));
 				// console.log('frame: '+ frame);
 				res.update = true;
 				res.buttonFrame = frame;
@@ -210,11 +227,18 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             
 		}
 		function reset(){
-            moveNumber = 1;
+            moveNumber     = 1;
             currentPlayer  = {id: "player1", token: "X"};
             previousPlayer = {id: "player2", token: "O"};
-            gameStarted = false;
+            gameStarted    = false;
+            pastMoves      = Array();
             ttt.reset();
+		}
+		
+		function sendChatMessage(res){
+            for (var i = 0; i < clients.length; i++){
+                clients[i].send(JSON.stringify(res));
+            }
 		}
 	});
 });

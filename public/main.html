@@ -1,17 +1,22 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-	    <meta charset="utf-8" />
-		<title> Tic-Tac-Toe </title>
-		<script type="text/javascript" src="js/phaser.min.js"></script>
-	    <!--<script type="text/javascript" src="js/ttt.js"></script>-->
-	    <script type="text/javascript" src="js/game.js"></script>
-		<link rel = 'stylesheet' type="text/css" href = 'css/main.css'>
-	</head>
-	<body>
-		<div id = 'textbox'> 
-			Chat:<br/> <input id = 'chatText' type = 'text' name = 'inputtext'> <button type = 'button' id='chatButton'> Submit </button>
-		</div>
-		<div id = 'chatbox'> Chatbox </div>
-	</body>
+<head>
+    <meta charset="utf-8" />
+	<title> Tic-Tac-Toe </title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <!--<script type="text/javascript" src="js/ttt.js"></script>-->
+    <script type="text/javascript" src="js/game.js"></script>
+	<link rel = 'stylesheet' type="text/css" href = 'css/main.css'>
+</head>
+<body>
+	<div id = 'textbox'> 
+		Chat:<br/> <textArea id='chatText' type='text' name='inputtext' autofocus></textArea> <button type='button' id='chatButton' onclick="postMessage()"> Submit </button>
+	</div>
+	<section id='chat-list'> Chatbox </section>
+</body>
+<template id="message-template">
+    <div class="message-wrapper">
+        <article class="message-text">blah blah blah</article>
+    </div>
+</template>
 </html>
