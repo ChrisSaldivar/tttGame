@@ -3,7 +3,6 @@
 }
 
 #chatText{
-    overflow: auto;
 	height: 50px;
 	width:  550px;
 }
@@ -22,6 +21,7 @@
 }
 
 #chat-list{
+    overflow: auto;
 	background-color: tan;
 	height: 600px;
 	width: 600px;
@@ -32,4 +32,6 @@
 
 .message-wrapper {
     border: 1px solid  grey;
+    height: 200px;
+    width: 200px;
 }

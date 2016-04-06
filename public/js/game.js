@@ -45,8 +45,9 @@ ws.onmessage = function(event) {
 };
 
 function postMessage (){
-    console.log("clicked");
+    // console.log("clicked");
     var text = elt("chatText").value;
+    text = text.replace(/\r?\n/g, '\n');
     var msg  = {cmd: "post message", value: text};
     ws.send(JSON.stringify(msg));
 }
@@ -65,11 +66,14 @@ function addChatMessage (message){
     
     var new_message = elt('message-template').content.cloneNode(true);
     new_message.querySelector(".message-text").textContent = message.value;
+    
     messageList.appendChild(new_message);
     
     if(message.value !== ""){
         elt("chatText").value = "";
+        elt("chatText").focus();
     }
+    messageList.scrollTop = messageList.scrollHeight;
 }
 
 ws.onclose = function() {

@@ -10,9 +10,9 @@
 </head>
 <body>
 	<div id = 'textbox'> 
-		Chat:<br/> <input id = 'chatText' type = 'text' name = 'inputtext'> <button type = 'button' id='chatButton' onclick="postMessage()"> Submit </button>
+		Chat:<br/> <textArea id='chatText' type='text' name='inputtext' autofocus></textArea> <button type='button' id='chatButton' onclick="postMessage()"> Submit </button>
 	</div>
-	<section id = 'chat-list'> Chatbox </section>
+	<section id='chat-list'> Chatbox </section>
 </body>
 <template id="message-template">
     <div class="message-wrapper">
