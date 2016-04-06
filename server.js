@@ -117,8 +117,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         };
         console.log("message recieved");
 		msg = JSON.parse(msg);
-
-		if (msg.status){
+		
+        if (msg.cmd === 'post message'){
+            sendChatMessage(msg);
+        }
+		else if (msg.status){
             console.log("Status: " + msg.status);
             if (msg.firstConnection){
                 if (player < 3){
@@ -189,6 +192,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             gameStarted    = false;
             pastMoves      = Array();
             ttt.reset();
+		}
+		
+		function sendChatMessage(res){
+            for (var i = 0; i < clients.length; i++){
+                clients[i].send(JSON.stringify(res));
+            }
 		}
 	});
 });
