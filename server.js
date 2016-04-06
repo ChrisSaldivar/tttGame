@@ -58,15 +58,15 @@ var ttt = {
 
 //create database and necessities for database
 
-var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database('users.db'); //open or create database
-db.close();
+// var sqlite3 = require("sqlite3").verbose();
+// var db = new sqlite3.Database('users.db'); //open or create database
+// db.close();
 
-//set up sequelize for orm
-var Sequelize = require('sequelize');
-var db = new Sequelize('sqlite://' + __dirname + "/users.db");
-var Users = db.import(__dirname + "/public/sequelize_models.js");
-Users.sync(); //create table
+// //set up sequelize for orm
+// var Sequelize = require('sequelize');
+// var db = new Sequelize('sqlite://' + __dirname + "/users.db");
+// var Users = db.import(__dirname + "/public/sequelize_models.js");
+// Users.sync(); //create table
 
 //server using express beginning of project
 var express     = require('express');
