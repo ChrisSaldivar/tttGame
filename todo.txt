@@ -1,0 +1,25 @@
+
+Required
+-------------------------------
+1)  Database
+2)  User logins
+3)  fix websocket disconnect bug
+4)  fix no newlines in chat bug
+5)  make chatbox pretty
+6)  assign websockets ids
+7)  choose new players
+8)  set up random pick function
+9)  clean up code
+10) add prompt for player
+11) add game timer
+12) add leader board
+13) add functionality so game doens't start unless both players are ready
+14) add audio cue for new game prompt
+
+
+
+
+Possible
+--------------------------------
+1) Let winner choose who plays first
+2) add audio cue for new message (and let user disable it)

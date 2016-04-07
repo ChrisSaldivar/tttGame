@@ -51,7 +51,7 @@ var ttt = {
             if (i != 2)
                 os+="[";
         }
-        os += "\n\n"
+        os += "\n\n";
         return os;
 	}
 };
@@ -101,6 +101,7 @@ Users.verifyUser = function(username){
 
 Users.init();
 Users.add('clay','blah');
+
 
 //server using express beginning of project
 var express     = require('express');
