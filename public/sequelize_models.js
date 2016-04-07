@@ -4,17 +4,6 @@ var db = new Sequelize('sqlite://' + __dirname + "/users.db");
 
 module.exports = function(sequelize, DataTypes){
    return db.define('users', { //create table model
-	token: {
-		type:      Sequelize.INTEGER,
-		//allowNull: false,
-		get:       function() {
-			var id = this.getDataValue('id');
-			return id;
-		},
-		set:       function(val) {
-			this.setDataValue('id', val);
-		}
-	},
 	username: {
 		type:      Sequelize.TEXT,
 		allowNull: false,
