@@ -3,18 +3,17 @@
 	<head>
 	    <title> Login Tic-Tac-Toe </title>
 		<link rel = 'stylesheet' href = 'css/index.css'>
+		<script type="text/javascript" src="js/login.js"></script>
 	</head>
 	<body>
 		<div id = 'login'>
-			<form method = 'post' action = 'auth'>
-				Username:
-				<input type = 'text' name = 'username'> <br/>
-				Password :
-				<input type = 'text' name = 'password'> <br/>
-				<input type = 'submit' value = 'Submit'>
-			</form>
+			Username:
+			<input type = 'text' name = 'username'> <br/>
+			Password :
+			<input type = 'text' name = 'password'> <br/>
+			<button type ='button' value = 'Submit' onclick='submitInfo()'>Submit</button>
 
-			<a href = 'newUser.html'> New User </a>
+			<a href = 'newUser.html'><button type='button'>New User</button></a>
 		</div>
 	</body>
 </html>

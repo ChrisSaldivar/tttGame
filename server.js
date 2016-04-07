@@ -66,13 +66,15 @@ Users.init    = function(){
         Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
     });
     console.log('Init Done');
-}
+};
+
 Users.close   = function(){Users.db.close()};
+
 Users.add     = function(username, password){ //return true if user added false indicates username is taken
     var success = true;
     try{
         Users.db.serialize(function(){
-            Users.db.run(`INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?)`, [username, password, 0, 0] );
+            Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0] );
         });
     } catch(e){
         success = false;
@@ -81,27 +83,35 @@ Users.add     = function(username, password){ //return true if user added false 
     console.log('Add Done');
     return success;
 };
+
 Users.remove  = function(username){
     Users.db.serialize(function(){
-        Users.db.run(`DELETE * FROM users WHERE username = ?;`, [username]);
+        Users.db.run('DELETE * FROM users WHERE username = ?;', [username]);
     });
-}
-Users.verifyUser = function(username){
-    Users.db.serialize(function(){
-        Users.db.each(`SELECT * FROM users WHERE username = ?;`, [username], function(err, row){
-            if (!err){
+};
 
-            }
+Users.verifyUser = function(username){
+    var item = {password: 'not set'};
+    var complete = false;
+    Users.db.serialize(function(){
+        Users.db.each('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
+            console.log("row",row.password);
+            item.password = row.password;
+            console.log("item",item.password);
         });
     });
-}
+    console.log(item.password);
+    if (complete){
+        console.log("done",item.password);
+    }
+};
 
 //end wrapper
 //
 
 Users.init();
-Users.add('clay','blah');
-
+// Users.add('clay','blah');
+Users.verifyUser('clay');
 
 //server using express beginning of project
 var express     = require('express');
@@ -118,6 +128,11 @@ var clients = [];
 app.post('/auth', function(req, res) { //route for checking user login
 	//check for valid login
 	res.sendFile(__dirname + '/public/main.html');
+	
+	/*
+	    call verifyUser from in here
+	*/
+	
 	console.log('Login Good.');
 });
 
