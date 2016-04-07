@@ -56,17 +56,51 @@ var ttt = {
 	}
 };
 
-//create database and necessities for database
+//custom orm wrapper
+//
+var Users = {};
+Users.sqlite3 = require('sqlite3').verbose();
+Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
+Users.init    = function(){
+    Users.db.serialize(function(){
+        Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
+    });
+    console.log('Init Done');
+}
+Users.close   = function(){Users.db.close()};
+Users.add     = function(username, password){ //return true if user added false indicates username is taken
+    var success = true;
+    try{
+        Users.db.serialize(function(){
+            Users.db.run(`INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?)`, [username, password, 0, 0] );
+        });
+    } catch(e){
+        success = false;
+        console.log('Username take');
+    }
+    console.log('Add Done');
+    return success;
+};
+Users.remove  = function(username){
+    Users.db.serialize(function(){
+        Users.db.run(`DELETE * FROM users WHERE username = ?;`, [username]);
+    });
+}
+Users.verifyUser = function(username){
+    Users.db.serialize(function(){
+        Users.db.each(`SELECT * FROM users WHERE username = ?;`, [username], function(err, row){
+            if (!err){
 
-var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database('users.db'); //open or create database
-db.close();
+            }
+        });
+    });
+}
 
-//set up sequelize for orm
-var Sequelize = require('sequelize');
-var db = new Sequelize('sqlite://' + __dirname + "/users.db");
-var Users = db.import(__dirname + "/public/sequelize_models.js");
-Users.sync(); //create table
+//end wrapper
+//
+
+Users.init();
+Users.add('clay','blah');
 
 //server using express beginning of project
 var express     = require('express');
@@ -76,7 +110,6 @@ var passport    = require('passport'); //used for user authentication
 var session     = require('express-session'); //used for user sessions
 var flash       = require('connect-flash'); //used for flashing messages to clients
 var cookieParser= require('cookie-parser'); //used to read cookies
-
 
 var gameStarted = false;
 var clients = [];
