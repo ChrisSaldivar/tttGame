@@ -56,8 +56,74 @@ var ttt = {
 	}
 };
 
+//custom orm wrapper
+//
+var Users = function(){
+    Users.sqlite3 = require('sqlite3').verbose();
+    Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
+    //Users.ws;
+    Users.init    = function(ws){
+        //Users.ws = ws;
+        Users.db.serialize(function(){
+            Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
+        });
+        console.log('Init Done');
+    };
+
+    Users.close   = function(){Users.db.close()};
+
+    Users.add     = function(username, password){ //return true if user added false indicates username is taken
+        Users.db.serialize(function(){
+            Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
+                if (err){
+                console.log('in');
+                }
+            });
+        });
+    };
+
+
+    Users.remove  = function(username){
+        Users.db.serialize(function(){
+            Users.db.run('DELETE * FROM users WHERE username = ?;', [username]);
+        });
+    };
+
+    Users.verifyUser = function(username, password, ws){
+        Users.db.serialize(function(){
+            Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
+                var res = {redirect: true, url:  ''};
+                if(row != null && row.password === password){
+                    res.redirect = true;
+                    res.url = 'http://chrisds.koding.io/main.html';
+                    // msg.url = 'localhost:3000/main.html';
+                }
+                else{
+                    res.redirect = false;
+                }
+                console.log(res);
+                ws.send(JSON.stringify(res));
+            });
+        });
+    };
+
+    Users.showLeaderBoard = function(){
+        Users.db.serialize(function(){
+            Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
+               /*
+                * Show players on leaderboard
+                */
+            });
+        });
+    };
+    return Users;
+};
+//end wrapper
+//
+
 //doesnt work for some reason
-var Users = require(__dirname + '/db/databaseModel.js');
+//var Users = require(__dirname + '/public/databaseModel.js');
+
 
 //server using express beginning of project
 var express     = require('express');
@@ -72,7 +138,7 @@ var gameStarted = false;
 var clients = {};
 
 app.ws('/auth', function(ws, req) { //route for checking user login
-    var User = new Users();
+    var User = Users();
     User.init();
 
 	//check for valid login
@@ -119,11 +185,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         console.log("message recieved");
 		msg = JSON.parse(msg);
 		console.log(msg);
-		if (msg.closing){
-            console.log(msg.id,"is closing");
-            delete clients[msg.id];
-		}
-        else if (msg.cmd === 'post message'){
+        if (msg.cmd === 'post message'){
             if (msg.value.match(/:.+/)){
                 sendChatMessage(msg);
             }
@@ -164,7 +226,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             }
             
             console.log(ttt.toString());
-            
+            console.log("\n\n",res,"\n\n");
             broadcast(res);
 		}
 	});
@@ -211,7 +273,6 @@ function checkGameOver (res){
 
 function broadcast (res){
     for (var i = 0; i < clients.length; i++){
-        console.log("broadcasting", i);
         clients[i].send(JSON.stringify(res));
     }
 }
@@ -226,8 +287,8 @@ function reset(){
 }
 
 function sendChatMessage(res){
-    for (var id in clients){
-        clients[id].send(JSON.stringify(res));
+    for (var i = 0; i < clients.length; i++){
+        clients[i].send(JSON.stringify(res));
     }
 }
 
