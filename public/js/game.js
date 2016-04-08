@@ -1,6 +1,7 @@
 var start;
 var messageRecieved = true;
 var id;
+var label;
 var buttons = [];
 var text;
 var canPlay = true;
@@ -17,8 +18,8 @@ function elt(id){
 ws.onopen = function() {
     var msg = {status: "Connection good.", firstConnection: true};
     ws.send(JSON.stringify(msg));
-    // var msg  = {cmd: "post message", value: ":Welcome [username here]!"};
-    // ws.send(JSON.stringify(msg));
+    var msg  = {cmd: "post message", value: ":Welcome [username here]!"};
+    ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
@@ -30,9 +31,10 @@ ws.onmessage = function(event) {
     if (message.cmd === 'post message'){
         addChatMessage(message);
     }
-    if (message.id){
+    if (message.label){
         id = message.id;
-        if (message.id === 'spectator'){
+        label = message.label;
+        if (message.label === 'spectator'){
             canPlay = false;
         }
         if (message.gameStarted){
@@ -124,7 +126,7 @@ ws.onclose = function() {
 
     function actionOnClick(button){
         if (!gameOver && canPlay && messageRecieved){
-            var msg = {cmd: 'play move', row: button.row, col: button.col, playerId: id};
+            var msg = {cmd: 'play move', row: button.row, col: button.col, playerLable: label};
             // start = window.performance.now();
             messageRecieved = false;
             waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
