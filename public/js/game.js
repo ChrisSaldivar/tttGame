@@ -16,6 +16,8 @@ function elt(id){
 ws.onopen = function() {
     var msg = {status: "Connection good.", firstConnection: true};
     ws.send(JSON.stringify(msg));
+    var msg  = {cmd: "post message", value: ":Welcome [username here]!"};
+    ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
@@ -50,7 +52,7 @@ function postMessage (){
     var text = elt("chatText").value;
     elt("chatText").value = "";
     text = text.replace(/\r?\n/g, '<br>');
-    var msg  = {cmd: "post message", value: text};
+    var msg  = {cmd: "post message", value: '[sender username]:' + text.trim()};
     ws.send(JSON.stringify(msg));
 }
 
