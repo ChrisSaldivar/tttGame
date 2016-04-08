@@ -9,7 +9,7 @@ function submitInfo(){
     };
     message.username = elt("username").value;
     message.password = elt("password").value;
-    ws.send(message);
+    ws.send(JSON.stringify(message));
 }
 
 ws.onopen = function() {

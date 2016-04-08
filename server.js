@@ -140,8 +140,10 @@ app.ws('/auth', function(ws, req) { //route for checking user login
 
 	//check for valid login
 	ws.on('message', function(msg){
-	    
+        console.log(msg);
+        msg = JSON.parse(msg);
 		if (msg.cmd === 'login'){
+            console.log('login');
 		    //msg.url = 'chrisds.koding.io/main.html';
             msg.url = 'localhost:3000/main.html';
 		}
