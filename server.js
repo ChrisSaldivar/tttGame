@@ -58,10 +58,12 @@ var ttt = {
 
 //custom orm wrapper
 //
-var Users = {};
+var Users = function(){
 Users.sqlite3 = require('sqlite3').verbose();
 Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
-Users.init    = function(){
+//Users.ws;
+Users.init    = function(ws){
+    //Users.ws = ws;
     Users.db.serialize(function(){
         Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
     });
@@ -71,18 +73,16 @@ Users.init    = function(){
 Users.close   = function(){Users.db.close()};
 
 Users.add     = function(username, password){ //return true if user added false indicates username is taken
-    var success = true;
-    try{
-        Users.db.serialize(function(){
-            Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0] );
+    Users.db.serialize(function(){
+        Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
+            if (err){
+                console.log('in');
+                Users.ws.send(__dirname + '/public/index.html')
+            }
         });
-    } catch(e){
-        success = false;
-        console.log('Username take');
-    }
-    console.log('Add Done');
-    return success;
+    });
 };
+
 
 Users.remove  = function(username){
     Users.db.serialize(function(){
@@ -106,21 +106,34 @@ Users.verifyUser = function(username){
     }
 };
 
+Users.showLeaderBoard = function(){
+    Users.db.serialize(function(){
+        Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
+            /*
+             * Show players on leaderboard
+             */
+        })
+    });
+};
+};
 //end wrapper
 //
-
-Users.init();
+var User = Users();
+User.init();
+User.add('clay','blah');
+User.verifyUser('clay');
+// Users.init();
 // Users.add('clay','blah');
-Users.verifyUser('clay');
+// Users.verifyUser('clay');
 
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
-var passport    = require('passport'); //used for user authentication
 var session     = require('express-session'); //used for user sessions
 var flash       = require('connect-flash'); //used for flashing messages to clients
 var cookieParser= require('cookie-parser'); //used to read cookies
+var password    = require('password-hash-and-salt'); //used for hashing password
 
 var gameStarted = false;
 var clients = [];
@@ -152,6 +165,13 @@ function Move (frame, index){
     this.buttonFrame = frame;
     this.buttonIndex = index;
 }
+
+// app.ws('/login', function(ws, req){
+//     var User = Users(ws);
+//     ws.on('message', function(msg){
+
+//     });
+// });
 
 app.ws('/game', function(ws, req) { //socket route for game requests
 

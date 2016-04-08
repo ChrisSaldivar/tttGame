@@ -5,8 +5,8 @@ var buttons = [];
 var text;
 var canPlay = true;
 
-var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-// var ws = new WebSocket('ws://localhost:3000/game');
+//var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+var ws = new WebSocket('ws://localhost:3000/game');
 var message = ''; //will hold response from server
 
 function elt(id){
