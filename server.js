@@ -119,7 +119,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         console.log("message recieved");
 		msg = JSON.parse(msg);
 		console.log(msg);
-        if (msg.cmd === 'post message'){
+		if (msg.closing){
+            console.log(msg.id,"is closing");
+            delete clients[msg.id];
+		}
+        else if (msg.cmd === 'post message'){
             if (msg.value.match(/:.+/)){
                 sendChatMessage(msg);
             }
@@ -207,6 +211,7 @@ function checkGameOver (res){
 
 function broadcast (res){
     for (var i = 0; i < clients.length; i++){
+        console.log("broadcasting", i);
         clients[i].send(JSON.stringify(res));
     }
 }
@@ -221,8 +226,8 @@ function reset(){
 }
 
 function sendChatMessage(res){
-    for (var i = 0; i < clients.length; i++){
-        clients[i].send(JSON.stringify(res));
+    for (var id in clients){
+        clients[id].send(JSON.stringify(res));
     }
 }
 

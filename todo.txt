@@ -21,5 +21,6 @@ Possible
 --------------------------------
 1) Let winner choose who plays first
 2) add audio cue for new message (and let user disable it)
-3)  make chatbox pretty
-4)  clean up code
+3) make chatbox pretty
+4) clean up code
+5) add winstreak
