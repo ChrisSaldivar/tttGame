@@ -1,4 +1,5 @@
-var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+//var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+var ws = new WebSocket('ws://localhost:3000/auth');
 
 function submitInfo(){
     var message = {
@@ -39,5 +40,4 @@ function displayError(){
     alert("Invalid login");
     elt("username").value = "";
     elt("password").value = "";
->>>>>>> 7ff779d0fce3f030d4a1ca897ac92415f6376a1e
 }

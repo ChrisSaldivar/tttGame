@@ -59,72 +59,66 @@ var ttt = {
 //custom orm wrapper
 //
 var Users = function(){
-Users.sqlite3 = require('sqlite3').verbose();
-Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
-//Users.ws;
-Users.init    = function(ws){
-    //Users.ws = ws;
-    Users.db.serialize(function(){
-        Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
-    });
-    console.log('Init Done');
-};
+    Users.sqlite3 = require('sqlite3').verbose();
+    Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
+    //Users.ws;
+    Users.init    = function(ws){
+        //Users.ws = ws;
+        Users.db.serialize(function(){
+            Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
+        });
+        console.log('Init Done');
+    };
 
-Users.close   = function(){Users.db.close()};
+    Users.close   = function(){Users.db.close()};
 
-Users.add     = function(username, password){ //return true if user added false indicates username is taken
-    Users.db.serialize(function(){
-        Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
-            if (err){
+    Users.add     = function(username, password){ //return true if user added false indicates username is taken
+        Users.db.serialize(function(){
+            Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
+                if (err){
                 console.log('in');
-                Users.ws.send(__dirname + '/public/index.html')
-            }
+                }
+            });
         });
-    });
-};
+    };
 
 
-Users.remove  = function(username){
-    Users.db.serialize(function(){
-        Users.db.run('DELETE * FROM users WHERE username = ?;', [username]);
-    });
-};
-
-Users.verifyUser = function(username){
-    var item = {password: 'not set'};
-    var complete = false;
-    Users.db.serialize(function(){
-        Users.db.each('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
-            console.log("row",row.password);
-            item.password = row.password;
-            console.log("item",item.password);
+    Users.remove  = function(username){
+        Users.db.serialize(function(){
+            Users.db.run('DELETE * FROM users WHERE username = ?;', [username]);
         });
-    });
-    console.log(item.password);
-    if (complete){
-        console.log("done",item.password);
-    }
-};
+    };
 
-Users.showLeaderBoard = function(){
-    Users.db.serialize(function(){
-        Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
-            /*
-             * Show players on leaderboard
-             */
-        })
-    });
-};
+    Users.verifyUser = function(username){
+        var item = {password: 'not set'};
+        var complete = false;
+        Users.db.serialize(function(){
+            Users.db.each('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
+                console.log("row",row.password);
+                item.password = row.password;
+                console.log("item",item.password);
+            });
+        });
+        console.log(item.password);
+        if (complete){
+            console.log("done",item.password);
+        }
+    };
+
+    Users.showLeaderBoard = function(){
+        Users.db.serialize(function(){
+            Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
+               /*
+                * Show players on leaderboard
+                */
+            })
+        });
+    };
+    return Users;
 };
 //end wrapper
 //
-var User = Users();
-User.init();
-User.add('clay','blah');
-User.verifyUser('clay');
-// Users.init();
-// Users.add('clay','blah');
-// Users.verifyUser('clay');
+
 
 //server using express beginning of project
 var express     = require('express');
@@ -138,13 +132,18 @@ var password    = require('password-hash-and-salt'); //used for hashing password
 var gameStarted = false;
 var clients = [];
 
-app.post('/auth', function(req, res) { //route for checking user login
+app.ws('/auth', function(ws, req) { //route for checking user login
+    var User = Users();
+    User.init();
+    User.add('clay','blah');
+    User.verifyUser('clay');
+
 	//check for valid login
-// 	res.sendFile(__dirname + '/public/main.html');
 	ws.on('message', function(msg){
 	    
 		if (msg.cmd === 'login'){
-		    msg.url = 'chrisds.koding.io/main.html';
+		    //msg.url = 'chrisds.koding.io/main.html';
+            msg.url = 'localhost:3000/main.html';
 		}
 	});
 	/*
@@ -170,13 +169,6 @@ function Move (frame, index){
     this.buttonFrame = frame;
     this.buttonIndex = index;
 }
-
-// app.ws('/login', function(ws, req){
-//     var User = Users(ws);
-//     ws.on('message', function(msg){
-
-//     });
-// });
 
 app.ws('/game', function(ws, req) { //socket route for game requests
 
