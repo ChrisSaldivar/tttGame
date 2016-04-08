@@ -4,11 +4,12 @@
 
 #chatText{
 	height: 50px;
-	width:  550px;
+	width:  600px;
 }
 
 #chatButton{
-	height: 50px;
+	position: absolute;
+	height: 55px;
 	width:  100px;
 }
 
@@ -22,16 +23,15 @@
 
 #chat-list{
     overflow: auto;
-	background-color: tan;
 	height: 600px;
 	width: 600px;
 	position:absolute;
 	top: 0px;
-	left:700px;
+	left:725px;
 }
 
 .message-wrapper {
     border: 1px solid  grey;
-    height: 200px;
-    width: 200px;
+    height: 50px;
+    width: 550px;
 }

@@ -186,7 +186,9 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 		msg = JSON.parse(msg);
 		
         if (msg.cmd === 'post message'){
-            sendChatMessage(msg);
+            if (msg.value.match(/:.+/)){
+                sendChatMessage(msg);
+            }
         }
 		else if (msg.status){
             console.log("Status: " + msg.status);
