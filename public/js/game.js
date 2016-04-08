@@ -56,6 +56,7 @@ function postMessage (){
     elt("chatText").value = "";
     text = text.replace(/\r?\n/g, '<br>');
     var msg  = {cmd: "post message", value: '[sender username]:' + text.trim()};
+    msg.id = id;
     ws.send(JSON.stringify(msg));
 }
 
@@ -83,7 +84,7 @@ function addChatMessage (message){
 }
 
 ws.onclose = function() {
-    var msg = {status: "Connection is closed..."};
+    var msg = {closing: true, id: id};
     ws.send(JSON.stringify(msg));
 };
 
@@ -126,7 +127,7 @@ ws.onclose = function() {
 
     function actionOnClick(button){
         if (!gameOver && canPlay && messageRecieved){
-            var msg = {cmd: 'play move', row: button.row, col: button.col, playerLable: label};
+            var msg = {cmd: 'play move', row: button.row, col: button.col, playerLabel: label, id: id};
             // start = window.performance.now();
             messageRecieved = false;
             waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});

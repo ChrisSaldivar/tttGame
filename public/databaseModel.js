@@ -1,9 +1,8 @@
 module.exports = function(){
     Users.sqlite3 = require('sqlite3').verbose();
     Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
-    //Users.ws;
+
     Users.init    = function(ws){
-        //Users.ws = ws;
         Users.db.serialize(function(){
             Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
         });
