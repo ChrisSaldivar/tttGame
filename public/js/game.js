@@ -55,7 +55,7 @@ function postMessage (){
     var text = elt("chatText").value;
     elt("chatText").value = "";
     text = text.replace(/\r?\n/g, '<br>');
-    var msg  = {cmd: "post message", value: '[sender username]:' + text.trim()};
+    var msg  = {cmd: "post message", value: '[sender username]: ' + text.trim()};
     msg.id = id;
     ws.send(JSON.stringify(msg));
 }
