@@ -1,9 +1,7 @@
-module.exports = function(){
+var Users = function(){
     Users.sqlite3 = require('sqlite3').verbose();
     Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
-    //Users.ws;
     Users.init    = function(ws){
-        //Users.ws = ws;
         Users.db.serialize(function(){
             Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
         });
@@ -29,20 +27,22 @@ module.exports = function(){
         });
     };
 
-    Users.verifyUser = function(username){
-        var item = {password: 'not set'};
-        var complete = false;
+    Users.verifyUser = function(username, password, ws){
         Users.db.serialize(function(){
-            Users.db.each('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
-                console.log("row",row.password);
-                item.password = row.password;
-                console.log("item",item.password);
+            Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
+                var res = {redirect: true, url:  ''};
+                if(row != null && row.password === password){
+                    res.redirect = true;
+                    res.url = 'http://chrisds.koding.io/main.html';
+                    // msg.url = 'localhost:3000/main.html';
+                }
+                else{
+                    res.redirect = false;
+                }
+                console.log(res);
+                ws.send(JSON.stringify(res));
             });
         });
-        console.log(item.password);
-        if (complete){
-            console.log("done",item.password);
-        }
     };
 
     Users.showLeaderBoard = function(){
@@ -51,8 +51,9 @@ module.exports = function(){
                /*
                 * Show players on leaderboard
                 */
-            })
+            });
         });
     };
     return Users;
 };
+module.exports = Users;
