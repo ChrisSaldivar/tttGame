@@ -127,8 +127,13 @@ var clients = [];
 
 app.post('/auth', function(req, res) { //route for checking user login
 	//check for valid login
-	res.sendFile(__dirname + '/public/main.html');
-	
+// 	res.sendFile(__dirname + '/public/main.html');
+	ws.on('message', function(msg){
+	    
+		if (msg.cmd === 'login'){
+		    msg.url = 'chrisds.koding.io/main.html';
+		}
+	});
 	/*
 	    call verifyUser from in here
 	*/
@@ -232,6 +237,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             }
             
 		}
+		
 		function reset(){
             moveNumber     = 1;
             currentPlayer  = {id: "player1", token: "X"};

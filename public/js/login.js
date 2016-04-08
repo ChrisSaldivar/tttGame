@@ -6,6 +6,8 @@ function submitInfo(){
         username: 'user',
         password: 'pass'
     };
+    message.username = elt("username").value;
+    message.password = elt("password").value;
     ws.send(message);
 }
 
@@ -34,5 +36,7 @@ function redirect(msg){
 }
 
 function displayError(){
-    
+    alert("Invalid login");
+    elt("username").value = "";
+    elt("password").value = "";
 }
