@@ -119,6 +119,9 @@ var Users = function(){
 //end wrapper
 //
 
+//doesnt work for some reason
+//var Users = require(__dirname + '/public/databaseModel.js');
+
 
 //server using express beginning of project
 var express     = require('express');
@@ -143,14 +146,15 @@ app.ws('/auth', function(ws, req) { //route for checking user login
         console.log(msg);
         msg = JSON.parse(msg);
 		if (msg.cmd === 'login'){
+            /*
+                call verifyUser from in here
+            */
             console.log('login');
 		    //msg.url = 'chrisds.koding.io/main.html';
             msg.url = 'localhost:3000/main.html';
+            //req.sendFile(__dirname + '/public/main.html');
 		}
 	});
-	/*
-	    call verifyUser from in here
-	*/
 	
 	console.log('Login Good.');
 });
