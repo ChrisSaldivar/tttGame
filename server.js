@@ -67,7 +67,7 @@ var Users = function(){
         Users.db.serialize(function(){
             Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
         });
-        console.log('Init Done');
+        print('Init Done');
     };
 
     Users.close   = function(){Users.db.close()};
@@ -76,12 +76,11 @@ var Users = function(){
         Users.db.serialize(function(){
             Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
                 if (err){
-                console.log('in');
+                print('in');
                 }
             });
         });
     };
-
 
     Users.remove  = function(username){
         Users.db.serialize(function(){
@@ -101,7 +100,7 @@ var Users = function(){
                 else{
                     res.redirect = false;
                 }
-                console.log(res);
+                print(res);
                 ws.send(JSON.stringify(res));
             });
         });
@@ -134,6 +133,8 @@ var flash       = require('connect-flash'); //used for flashing messages to clie
 var cookieParser= require('cookie-parser'); //used to read cookies
 var password    = require('password-hash-and-salt'); //used for hashing password
 
+var print = console.log;
+
 var gameStarted = false;
 var clients = {};
 
@@ -143,7 +144,7 @@ app.ws('/auth', function(ws, req) { //route for checking user login
 
 	//check for valid login
 	ws.on('message', function(msg){
-        console.log(msg);
+        print(msg);
         msg = JSON.parse(msg);
         
 		if (msg.cmd === 'login'){
@@ -151,13 +152,13 @@ app.ws('/auth', function(ws, req) { //route for checking user login
 		}
 	});
 	
-	console.log('Login Good.');
+	print('Login Good.');
 });
 
 app.post('/newUser', function(req, res) { //route for checking new user login
 	//check for valid login
 	res.sendFile(__dirname + '/public/main.html');
-	console.log('Login Good.');
+	print('Login Good.');
 });
 
 var currentPlayer  = {label: "player1", token: "X"};
@@ -182,26 +183,30 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             gameOver:    false,
             result:      ""
         };
-        console.log("message recieved");
+        print("message recieved");
 		msg = JSON.parse(msg);
-		console.log(msg);
-        if (msg.cmd === 'post message'){
+		print(msg);
+		if (msg.closing){
+            print(msg.id,"is closing");
+            delete clients[msg.id];
+		}
+        else if (msg.cmd === 'post message'){
             if (msg.value.match(/:.+/)){
-                sendChatMessage(msg);
+                broadcast(msg);
             }
         }
 		else if (msg.status){
-            console.log("Status: " + msg.status);
+            print("Status: " + msg.status);
             if (msg.firstConnection){
                 var id = randomString();
                 if (player < 3){
                     var firstConnectRes = {label: "player" + player++, id: id};
-                    console.log(firstConnectRes.label, "has joined");
+                    print(firstConnectRes.label, "has joined");
                     ws.send(JSON.stringify(firstConnectRes));
                 }
                 else{
                     var spectatorRes = {label: "spectator", id: id};
-                    console.log(spectatorRes.label,"has joined");
+                    print(spectatorRes.label,"has joined");
                     if (gameStarted){
                         spectatorRes.pastMoves   = pastMoves;
                         spectatorRes.gameStarted = gameStarted;
@@ -217,7 +222,9 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 			index        = buttonRow * 3 + buttonCol;
 			
 			// Attempt to play the move
-			if (msg.playerId === currentPlayer.id && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
+			print(msg.playerLabel);
+			print(currentPlayer.id);
+			if (msg.playerLabel === currentPlayer.label && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
                 playMove(index, res);
             }
             // Check if game is over and report results
@@ -225,8 +232,8 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 checkGameOver(res);
             }
             
-            console.log(ttt.toString());
-            console.log("\n\n",res,"\n\n");
+            print(ttt.toString());
+            
             broadcast(res);
 		}
 	});
@@ -272,8 +279,8 @@ function checkGameOver (res){
 }
 
 function broadcast (res){
-    for (var i = 0; i < clients.length; i++){
-        clients[i].send(JSON.stringify(res));
+    for (var id in clients){
+        clients[id].send(JSON.stringify(res));
     }
 }
 
@@ -286,14 +293,8 @@ function reset(){
     ttt.reset();
 }
 
-function sendChatMessage(res){
-    for (var i = 0; i < clients.length; i++){
-        clients[i].send(JSON.stringify(res));
-    }
-}
-
 app.use('/', express.static(__dirname + '/public')); //route to serve static login page
 
 app.listen(3000, function () { //start listening for activity on port 3000
-  console.log('Example app listening on port 3000!');
+  print('Example app listening on port 3000!');
 });

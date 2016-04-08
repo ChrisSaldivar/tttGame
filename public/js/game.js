@@ -109,6 +109,7 @@ ws.onclose = function() {
     }
     
     function generateButtons(){
+        console.log("generating buttons");
         var button;
         var x = 150;
         var y = 75;
@@ -123,6 +124,7 @@ ws.onclose = function() {
             x = 150;
             y += 150;
         }
+        console.log("buttons generated");
     }
 
     function actionOnClick(button){
