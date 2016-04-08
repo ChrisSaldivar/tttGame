@@ -12,9 +12,10 @@ Required
 9)  clean up code
 10) add prompt for player
 11) add game timer
-12) add leader board
+12) add leaderboard
 13) add functionality so game doens't start unless both players are ready
 14) add audio cue for new game prompt
+15) sanitize user input before adding to sql database
 
 
 

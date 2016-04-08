@@ -89,20 +89,22 @@ var Users = function(){
         });
     };
 
-    Users.verifyUser = function(username){
-        var item = {password: 'not set'};
-        var complete = false;
+    Users.verifyUser = function(username, password, ws){
         Users.db.serialize(function(){
-            Users.db.each('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
-                console.log("row",row.password);
-                item.password = row.password;
-                console.log("item",item.password);
+            Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
+                var res = {redirect: true, url:  ''};
+                if(row != null && row.password === password){
+                    res.redirect = true;
+                    res.url = 'http://chrisds.koding.io/main.html';
+                    // msg.url = 'localhost:3000/main.html';
+                }
+                else{
+                    res.redirect = false;
+                }
+                console.log(res);
+                ws.send(JSON.stringify(res));
             });
         });
-        console.log(item.password);
-        if (complete){
-            console.log("done",item.password);
-        }
     };
 
     Users.showLeaderBoard = function(){
@@ -111,7 +113,7 @@ var Users = function(){
                /*
                 * Show players on leaderboard
                 */
-            })
+            });
         });
     };
     return Users;
@@ -138,21 +140,14 @@ var clients = [];
 app.ws('/auth', function(ws, req) { //route for checking user login
     var User = Users();
     User.init();
-    User.add('clay','blah');
-    User.verifyUser('clay');
 
 	//check for valid login
 	ws.on('message', function(msg){
         console.log(msg);
         msg = JSON.parse(msg);
+        
 		if (msg.cmd === 'login'){
-            /*
-                call verifyUser from in here
-            */
-            console.log('login');
-		    //msg.url = 'chrisds.koding.io/main.html';
-            msg.url = 'localhost:3000/main.html';
-            //req.sendFile(__dirname + '/public/main.html');
+            Users.verifyUser(msg.username, msg.password, ws);
 		}
 	});
 	

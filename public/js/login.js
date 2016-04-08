@@ -1,5 +1,5 @@
-//var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
-var ws = new WebSocket('ws://localhost:3000/auth');
+var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+// var ws = new WebSocket('ws://localhost:3000/auth');
 
 function submitInfo(){
     var message = {
@@ -19,6 +19,7 @@ ws.onopen = function() {
 
 ws.onmessage = function(event) {
     var msg = JSON.parse(event.data);
+    console.log(msg);
     if (msg.redirect){
         redirect(msg);
     }
@@ -33,6 +34,8 @@ function elt(id){
 
 
 function redirect(msg){
+    console.log(msg.url);
+    console.log("loc",window.location);
     window.location = msg.url;
 }
 
