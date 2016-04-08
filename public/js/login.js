@@ -35,7 +35,6 @@ function elt(id){
 
 function redirect(msg){
     console.log(msg.url);
-    console.log("loc",window.location);
     window.location = msg.url;
 }
 
