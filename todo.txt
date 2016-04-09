@@ -1,16 +1,13 @@
 
 Required
 -------------------------------
-1)  Database
-2)  User logins
-5)  choose new players
-6)  set up random pick function
-7)  add prompt for player
-8) add game timer
-9) add leaderboard
-10) add functionality so game doens't start unless both players are ready
-11) add audio cue for new game prompt
-12) sanitize user input before adding to sql database
+1)  choose new players
+2)  set up random pick function
+3)  add prompt for player
+4)  add move timer
+5)  add leaderboard
+6)  add functionality so game doens't start unless both players are ready
+7)  add audio cue for new game prompt
 
 
 

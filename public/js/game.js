@@ -7,8 +7,6 @@ var text;
 var canPlay = true;
 
 var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-ws.bleh = "bleh works";
-console.log(ws.bleh);
 // var ws = new WebSocket('ws://localhost:3000/game');
 
 var message = ''; //will hold response from server
@@ -87,7 +85,6 @@ function addChatMessage (message){
 
 //  function run() {
     var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
-    console.log("game Made");
     var background;
     var gameOver = false;
 
@@ -106,7 +103,6 @@ function addChatMessage (message){
     }
     
     function generateButtons(){
-        console.log("generating buttons");
         var button;
         var x = 150;
         var y = 75;
@@ -121,7 +117,6 @@ function addChatMessage (message){
             x = 150;
             y += 150;
         }
-        console.log("buttons generated");
     }
 
     function actionOnClick(button){
@@ -141,15 +136,11 @@ function addChatMessage (message){
     }
 
     function changeFrame(message){
-        console.log("index: "+message.buttonIndex);
         var frame = message.buttonFrame;
-        console.log("frame is: "+ frame);
-        console.log("typeof frame: "+typeof frame);
         buttons[message.buttonIndex].frame = frame;
     }
 
     function displayPastMoves(message){
-        console.log("GAME STARTED ALREADY");
         for (var i = 0; i < message.pastMoves.length; i++){
             // console.log("button index: ",message.pastMoves[i].buttonIndex);
             // console.log("frame is: ",message.pastMoves[i].buttonFrame);
