@@ -97,7 +97,16 @@ app.ws('/newUser', function(ws, res) { //route for checking new user login
         msg = JSON.parse(msg);
         
         if (msg.cmd === 'register'){
-            User.add(msg.username, msg.password, ws);
+            password(msg.password).hash(function(error, hash) {
+                if(error)
+                    throw new Error('Something went wrong!');
+                
+                delete msg.password;
+                // Store hash (incl. algorithm, iterations, and salt) 
+                msg.hash = hash;
+                User.add(msg.username, msg.hash, ws);
+            });
+            
         }
 	});
 	

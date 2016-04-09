@@ -22,3 +22,4 @@ Possible
 3) make chatbox pretty
 4) clean up code
 5) add winstreak
+6) use emails in user registration
