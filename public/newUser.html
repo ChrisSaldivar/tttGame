@@ -1,18 +1,17 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-    	<title> New User Login </title>
-		<link rel = 'stylesheet' href = 'css/index.css'>
+	    <title> Login Tic-Tac-Toe </title>
+		<link rel='stylesheet' href='css/index.css'>
+		<script type="text/javascript" src="js/newUser.js"></script>
 	</head>
 	<body>
 		<div id = 'login'>
-			<form method = 'post' action = 'newUser'>
-				Enter Username:
-				<input type = 'text' id = 'username'> <br/>
-				Enter Password :
-				<input type = 'text' id = 'password'> <br/>
-				<input type = 'submit' value = 'Submit'>
-			</form>
+			Username :
+			<input type='text' id='username'><br/>
+			Password :
+			<input type='text' id='password'><br/>
+			<button type='button' value='Submit' onclick='submitInfo()'>Submit</button>
 		</div>
 	</body>
 </html>

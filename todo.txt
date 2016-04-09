@@ -3,8 +3,6 @@ Required
 -------------------------------
 1)  Database
 2)  User logins
-3)  fix websocket disconnect bug
-4)  assign websockets ids
 5)  choose new players
 6)  set up random pick function
 7)  add prompt for player

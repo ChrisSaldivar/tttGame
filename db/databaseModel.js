@@ -11,12 +11,14 @@ var Users = function(){
 
     Users.close   = function(){Users.db.close()};
 
-    Users.add     = function(username, password){ //return true if user added false indicates username is taken
+    Users.add     = function(username, password, ws){ //return true if user added false indicates username is taken
         Users.db.serialize(function(){
             Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
-                if (err){
-                console.log('in');
+                var res = {redirect: false};
+                if (!err){
+                    res = {redirect: true, url: "http://chrisds.koding.io"};
                 }
+                ws.send(JSON.stringify(res));
             });
         });
     };
@@ -31,15 +33,13 @@ var Users = function(){
     Users.verifyUser = function(username, password, ws){
         Users.db.serialize(function(){
             Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
-                var res = {redirect: true, url:  ''};
+                var res = {redirect: false, url:  ''};
                 if(row != null && row.password === password){
                     res.redirect = true;
                     res.url = 'http://chrisds.koding.io/main.html';
                     // msg.url = 'localhost:3000/main.html';
                 }
-                else{
-                    res.redirect = false;
-                }
+                
                 console.log(res);
                 ws.send(JSON.stringify(res));
             });
@@ -57,4 +57,5 @@ var Users = function(){
     };
     return Users;
 };
+
 module.exports = Users;

@@ -56,72 +56,7 @@ var ttt = {
 	}
 };
 
-//custom orm wrapper
-//
-var Users = function(){
-    Users.sqlite3 = require('sqlite3').verbose();
-    Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
-    //Users.ws;
-    Users.init    = function(ws){
-        //Users.ws = ws;
-        Users.db.serialize(function(){
-            Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, wins INTEGER, losses INTEGER);');
-        });
-        print('Init Done');
-    };
-
-    Users.close   = function(){Users.db.close()};
-
-    Users.add     = function(username, password){ //return true if user added false indicates username is taken
-        Users.db.serialize(function(){
-            Users.db.run('INSERT INTO users (username, password, wins, losses) VALUES (?,?,?,?);', [username, password, 0, 0],function(err){
-                if (err){
-                print('in');
-                }
-            });
-        });
-    };
-
-    Users.remove  = function(username){
-        Users.db.serialize(function(){
-            Users.db.run('DELETE * FROM users WHERE username = ?;', [username]);
-        });
-    };
-
-    Users.verifyUser = function(username, password, ws){
-        Users.db.serialize(function(){
-            Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
-                var res = {redirect: true, url:  ''};
-                if(row != null && row.password === password){
-                    res.redirect = true;
-                    res.url = 'http://chrisds.koding.io/main.html';
-                    // msg.url = 'localhost:3000/main.html';
-                }
-                else{
-                    res.redirect = false;
-                }
-                print(res);
-                ws.send(JSON.stringify(res));
-            });
-        });
-    };
-
-    Users.showLeaderBoard = function(){
-        Users.db.serialize(function(){
-            Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
-               /*
-                * Show players on leaderboard
-                */
-            });
-        });
-    };
-    return Users;
-};
-//end wrapper
-//
-
-//doesnt work for some reason
-//var Users = require(__dirname + '/public/databaseModel.js');
+var Users = require(__dirname + '/db/databaseModel.js');
 
 
 //server using express beginning of project
@@ -135,30 +70,37 @@ var password    = require('password-hash-and-salt'); //used for hashing password
 
 var print = console.log;
 
+
 var gameStarted = false;
 var clients = {};
+var User = Users();
+User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
-    var User = Users();
-    User.init();
-
-	//check for valid login
+    //check for valid login
 	ws.on('message', function(msg){
         print(msg);
         msg = JSON.parse(msg);
         
 		if (msg.cmd === 'login'){
-            Users.verifyUser(msg.username, msg.password, ws);
+            User.verifyUser(msg.username, msg.password, ws);
 		}
 	});
 	
 	print('Login Good.');
 });
 
-app.post('/newUser', function(req, res) { //route for checking new user login
-	//check for valid login
-	res.sendFile(__dirname + '/public/main.html');
-	print('Login Good.');
+app.ws('/newUser', function(ws, res) { //route for checking new user login
+	// Register new user
+	ws.on('message', function(msg){
+        print(msg);
+        msg = JSON.parse(msg);
+        
+        if (msg.cmd === 'register'){
+            User.add(msg.username, msg.password, ws);
+        }
+	});
+	
 });
 
 var currentPlayer  = {label: "player1", token: "X"};
@@ -175,16 +117,7 @@ function Move (frame, index){
 app.ws('/game', function(ws, req) { //socket route for game requests
 
     ws.on('close', function(code, msg){
-        var id;
-        for (id in clients){
-            try{
-                clients[id].send(JSON.stringify({test: "t"}));
-            }
-            catch(INVALID_STATE_ERR){
-                delete clients[id];
-            }
-        }
-		
+        removeUser();
     });
 
 	//for game
@@ -248,6 +181,18 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 	});
 });
 
+function removeUser (){
+    var id;
+    for (id in clients){
+        try{
+            clients[id].send(JSON.stringify({test: "t"}));
+        }
+        catch(INVALID_STATE_ERR){
+            delete clients[id];
+        }
+    }
+}
+
 /*
     source: http://stackoverflow.com/a/10727155/5451571
     user:   Nimphious
@@ -289,7 +234,6 @@ function checkGameOver (res){
 
 function broadcast (res){
     for (var id in clients){
-        console.log(clients[id].readystate);
         clients[id].send(JSON.stringify(res));
     }
 }
