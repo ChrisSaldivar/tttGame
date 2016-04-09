@@ -7,6 +7,8 @@ var text;
 var canPlay = true;
 
 var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+ws.bleh = "bleh works";
+console.log(ws.bleh);
 // var ws = new WebSocket('ws://localhost:3000/game');
 
 var message = ''; //will hold response from server
@@ -18,7 +20,7 @@ function elt(id){
 ws.onopen = function() {
     var msg = {status: "Connection good.", firstConnection: true};
     ws.send(JSON.stringify(msg));
-    var msg  = {cmd: "post message", value: ":Welcome [username here]!"};
+    msg  = {cmd: "post message", value: ":Welcome [username here]!"};
     ws.send(JSON.stringify(msg));
 };
 
@@ -82,11 +84,6 @@ function addChatMessage (message){
     }
     messageList.scrollTop = messageList.scrollHeight;
 }
-
-ws.onclose = function() {
-    var msg = {closing: true, id: id};
-    ws.send(JSON.stringify(msg));
-};
 
 //  function run() {
     var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});

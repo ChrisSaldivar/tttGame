@@ -174,6 +174,19 @@ function Move (frame, index){
 
 app.ws('/game', function(ws, req) { //socket route for game requests
 
+    ws.on('close', function(code, msg){
+        var id;
+        for (id in clients){
+            try{
+                clients[id].send(JSON.stringify({test: "t"}));
+            }
+            catch(INVALID_STATE_ERR){
+                delete clients[id];
+            }
+        }
+		
+    });
+
 	//for game
 	ws.on('message', function(msg) {
         var res = {
@@ -183,14 +196,10 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             gameOver:    false,
             result:      ""
         };
-        print("message recieved");
 		msg = JSON.parse(msg);
 		print(msg);
-		if (msg.closing){
-            print(msg.id,"is closing");
-            delete clients[msg.id];
-		}
-        else if (msg.cmd === 'post message'){
+		
+		if (msg.cmd === 'post message'){
             if (msg.value.match(/:.+/)){
                 broadcast(msg);
             }
@@ -280,6 +289,7 @@ function checkGameOver (res){
 
 function broadcast (res){
     for (var id in clients){
+        console.log(clients[id].readystate);
         clients[id].send(JSON.stringify(res));
     }
 }
