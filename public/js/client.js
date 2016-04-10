@@ -83,7 +83,6 @@ function addChatMessage (message){
     messageList.scrollTop = messageList.scrollHeight;
 }
 
-
 window.onload = console.log("loading");
 
 // Make the function wait until the connection is made...

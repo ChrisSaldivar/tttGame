@@ -1,62 +1,5 @@
-var ttt = {
-	board: [["","",""], ["","",""], ["","",""]],
-	ROWS:  3,
-	COLS:  3,
-	reset: function(){
-		for (var i = 0; i < this.ROWS; i++) {
-			for (var j = 0; j < this.COLS; j++){
-				this.board[i][j] = "";
-			}
-		}
-	},
-	checkWin: function(){
-        var winner = "";
-		// Horizontal win
-		for (var i = 0; i < this.ROWS; i++)
-            if (this.board[i][0] == this.board[i][1] && this.board[i][1] == this.board[i][2])
-                if (this.board[i][0] !== ""){
-                    winner = this.board[i][0];
-				}
-		// Vertical win
-        for (i = 0; i < this.COLS; i++)
-            if (this.board[0][i] == this.board[1][i] && this.board[1][i] == this.board[2][i])
-                if (this.board[0][i] !== ""){
-                     winner = this.board[0][i];
-				}
-		// Diagonol win
-		if ((this.board[0][0] == this.board[1][1] && this.board[1][1] == this.board[2][2]) || 
-            (this.board[0][2] == this.board[1][1] && this.board[1][1] == this.board[2][0]))
-                if (this.board[1][1] !== ""){
-					winner = this.board[1][1];
-                }
-		return winner;
-	},
-	playMove: function(row, col, token){
-        var validMove = false;
-        if (this.board[row][col] === ""){
-			this.board[row][col] = token;
-			validMove = true;
-		}
-		return validMove;
-	},
-	toString : function(){
-        var os = "\n\n[";
-        for(var i =0; i<3; i++){
-            for (var j=0; j<3; j++){
-                os += this.board[i][j]; 
-                if (j != 2)
-                    os += ", ";
-            }
-            os += "]\n"; 
-            if (i != 2)
-                os+="[";
-        }
-        os += "\n\n";
-        return os;
-	}
-};
-
 var Users = require(__dirname + '/db/databaseModel.js');
+var ttt   = require(__dirname + '/ttt.js');
 
 
 //server using express beginning of project
@@ -68,8 +11,6 @@ var flash       = require('connect-flash'); //used for flashing messages to clie
 var cookieParser= require('cookie-parser'); //used to read cookies
 var password    = require('password-hash-and-salt'); //used for hashing password
 
-var print = console.log;
-
 
 var gameStarted = false;
 var clients = {};
@@ -78,22 +19,22 @@ User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
     //check for valid login
-	ws.on('message', function(msg){
-        print(msg);
+    ws.on('message', function(msg){
+        console.log(msg);
         msg = JSON.parse(msg);
         
-		if (msg.cmd === 'login'){
+        if (msg.cmd === 'login'){
             User.verifyUser(msg.username, msg.password, ws);
-		}
-	});
-	
-	print('Login Good.');
+        }
+    });
+    
+    console.log('Login Good.');
 });
 
 app.ws('/newUser', function(ws, res) { //route for checking new user login
-	// Register new user
-	ws.on('message', function(msg){
-        print(msg);
+    // Register new user
+    ws.on('message', function(msg){
+        console.log(msg);
         msg = JSON.parse(msg);
         
         if (msg.cmd === 'register'){
@@ -108,12 +49,12 @@ app.ws('/newUser', function(ws, res) { //route for checking new user login
             });
             
         }
-	});
-	
+    });
+    
 });
 
-var currentPlayer  = {label: "player1", token: "X"};
-var previousPlayer = {label: "player2", token: "O"};
+var currentPlayer  = {label: "player1", token: "X", id: ""};
+var previousPlayer = {label: "player2", token: "O", id: ""};
 var moveNumber     = 1;
 var player         = 1;
 var pastMoves      = Array();
@@ -129,8 +70,8 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         removeUser();
     });
 
-	//for game
-	ws.on('message', function(msg) {
+    //for game
+    ws.on('message', function(msg) {
         var res = {
             buttonIndex: -1,
             update:      false,
@@ -138,26 +79,32 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             gameOver:    false,
             result:      ""
         };
-		msg = JSON.parse(msg);
-		print(msg);
-		
-		if (msg.cmd === 'post message'){
+        msg = JSON.parse(msg);
+        console.log(msg);
+        
+        if (msg.cmd === 'post message'){
             if (msg.value.match(/:.+/)){
                 broadcast(msg);
             }
         }
-		else if (msg.status){
-            print("Status: " + msg.status);
+        else if (msg.status){
+            console.log("Status: " + msg.status);
             if (msg.firstConnection){
                 var id = randomString();
                 if (player < 3){
                     var firstConnectRes = {label: "player" + player++, id: id};
-                    print(firstConnectRes.label, "has joined");
+                    if (player == 1){
+                        currentPlayer.id = id;
+                    }
+                    else{
+                        previousPlayer.id = id;
+                    }
+                    console.log(firstConnectRes.label, "has joined");
                     ws.send(JSON.stringify(firstConnectRes));
                 }
                 else{
                     var spectatorRes = {label: "spectator", id: id};
-                    print(spectatorRes.label,"has joined");
+                    console.log(spectatorRes.label,"has joined");
                     if (gameStarted){
                         spectatorRes.pastMoves   = pastMoves;
                         spectatorRes.gameStarted = gameStarted;
@@ -166,16 +113,14 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 }
                 clients[id] = ws;
             }
-		}
-		else if (msg.cmd === 'play move'){
-			buttonRow    = msg.row;
-			buttonCol    = msg.col;
-			index        = buttonRow * 3 + buttonCol;
-			
-			// Attempt to play the move
-			print(msg.playerLabel);
-			print(currentPlayer.id);
-			if (msg.playerLabel === currentPlayer.label && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
+        }
+        else if (msg.cmd === 'play move'){
+            buttonRow    = msg.row;
+            buttonCol    = msg.col;
+            index        = buttonRow * 3 + buttonCol;
+            
+            // Attempt to play the move
+            if (msg.playerLabel === currentPlayer.label && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
                 playMove(index, res);
             }
             // Check if game is over and report results
@@ -183,11 +128,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 checkGameOver(res);
             }
             
-            print(ttt.toString());
+            console.log(ttt.toString());
             
             broadcast(res);
-		}
-	});
+        }
+    });
 });
 
 function removeUser (){
@@ -219,12 +164,12 @@ function playMove (index, res){
     res.buttonIndex = index;
     var frame = (currentPlayer.token === "X") ? 1 : 2;
     pastMoves.push(new Move(frame, index));
-	res.update = true;
-	res.buttonFrame = frame;
-	var temp = currentPlayer;
-	currentPlayer = previousPlayer;
-	previousPlayer = temp;
-	moveNumber++;
+    res.update = true;
+    res.buttonFrame = frame;
+    var temp = currentPlayer;
+    currentPlayer = previousPlayer;
+    previousPlayer = temp;
+    moveNumber++;
 }
 
 function checkGameOver (res){
@@ -259,5 +204,5 @@ function reset(){
 app.use('/', express.static(__dirname + '/public')); //route to serve static login page
 
 app.listen(3000, function () { //start listening for activity on port 3000
-  print('Example app listening on port 3000!');
+  console.log('Example app listening on port 3000!');
 });
