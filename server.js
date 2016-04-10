@@ -1,5 +1,5 @@
 var Users = require(__dirname + '/db/databaseModel.js');
-var ttt   = require(__dirname + '/ttt.js');
+var ttt   = require(__dirname + '/public/js/ttt.js');
 
 
 //server using express beginning of project
