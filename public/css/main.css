@@ -23,11 +23,11 @@
 
 #chat-list{
   overflow: auto;
-  height: 600px;
+  height: 615px;
   width: 600px;
   border: 1px solid black;
   position:absolute;
-  top: 0px;
+  top: 8px;
   left:725px;
   border: 1px sold black;
 }
