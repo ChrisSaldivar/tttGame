@@ -13,8 +13,8 @@ var password    = require('password-hash-and-salt'); //used for hashing password
 
 
 var gameStarted = false;
-var clients = {};
-var User = Users();
+var clients     = {};
+var User        = Users();
 User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
@@ -47,7 +47,7 @@ app.ws('/newUser', function(ws, res) { //route for checking new user login
                 msg.hash = hash;
                 User.add(msg.username, msg.hash, ws);
             });
-            
+            console.log("New User added.");
         }
     });
     
