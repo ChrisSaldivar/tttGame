@@ -26,6 +26,12 @@ var Users = function(){
         });
     };
 
+    Users.updateWinsandLosses = function(username,wins,losses){
+        Users.db.serialize(function(){
+            Users.db.run('UPDATE users SET wins = ?, losses = ? WHERE username = ?;',[wins,losses,username]);
+        });
+        console.log('Update Done');
+    };
 
     Users.remove  = function(username){
         Users.db.serialize(function(){
