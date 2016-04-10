@@ -34,7 +34,7 @@
 
 .message-wrapper {
     border: 1px solid  grey;
-    width: 550px;
+    width: 600px;
     display: inline-block;
     word-wrap: break-word;
 }
