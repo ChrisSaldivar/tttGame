@@ -19,35 +19,13 @@ var Users = function(){
                 console.log("\nHASH:",hash);
                 var res = {redirect: false};
                 if (!err){
-                    //res = {redirect: true, url: "http://chrisds.koding.io"};
-                    res = {redirect: true, url: "http://localhost:3000"};
+                    res = {redirect: true, url: "http://chrisds.koding.io"};
                 }
                 ws.send(JSON.stringify(res));
             });
         });
     };
 
-    Users.updateWinsandLosses = function(username, won, lost){
-        Users.db.serialize(function(username,won,lost){
-            Users.db.get('SELECT wins FROM users WHERE username = ?;', [won], function(err, wins){
-                if(wins != null){
-                    Users.db.run("UPDATE users SET wins = ? WHERE username = ?;",[++wins,won]);
-                }
-                else{
-                    console.log("\nNOT IN TABLE",res);
-                }
-            });
-            Users.db.get('SELECT losses FROM users WHERE username = ?;', [lost], function(err, losses){
-                if(losses != null){
-                    Users.db.run("UPDATE users SET losses = ? WHERE username = ?;",[++losses,lost]);
-                }
-                else{
-                    console.log("\nNOT IN TABLE",res);
-                }
-            });
-        });
-        console.log('Update Done');
-    };
 
     Users.remove  = function(username){
         Users.db.serialize(function(){
@@ -91,8 +69,8 @@ function verifyPass (pass, hash, ws, res){
             console.log("error");
 		if(verified) {
 			res.redirect = true;
-            //res.url = 'http://chrisds.koding.io/main.html';
-            res.url = 'http://localhost:3000/main.html';
+            res.url = 'http://chrisds.koding.io/main.html';
+            // msg.url = 'localhost:3000/main.html';
 		}
 		console.log("\nFROM VERIFY PASS",res);
 		ws.send(JSON.stringify(res));

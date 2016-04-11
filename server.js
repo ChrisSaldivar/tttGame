@@ -8,13 +8,21 @@ var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
 var session     = require('express-session'); //used for user sessions
 var flash       = require('connect-flash'); //used for flashing messages to clients
-var cookieParser= require('cookie-parser'); //used to read cookies
 var password    = require('password-hash-and-salt'); //used for hashing password
 
+app.use(session({ 
+    secret: 'keyboard cat',
+    resave: true, 
+    saveUninitialized: true,
+    cookie: { 
+        maxAge: 60000,
+        views: 1 
+    }
+}));
 
 var gameStarted = false;
-var clients     = {};
-var User        = Users();
+var clients = {};
+var User = Users();
 User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
@@ -31,7 +39,8 @@ app.ws('/auth', function(ws, req) { //route for checking user login
     console.log('Login Good.');
 });
 
-app.ws('/newUser', function(ws, res) { //route for checking new user login
+app.ws('/newUser', function(ws, req) { //route for checking new user login
+    
     // Register new user
     ws.on('message', function(msg){
         console.log(msg);
@@ -47,7 +56,7 @@ app.ws('/newUser', function(ws, res) { //route for checking new user login
                 msg.hash = hash;
                 User.add(msg.username, msg.hash, ws);
             });
-            console.log("New User added.");
+            
         }
     });
     
@@ -65,13 +74,16 @@ function Move (frame, index){
 }
 
 app.ws('/game', function(ws, req) { //socket route for game requests
-
+    
     ws.on('close', function(code, msg){
         removeUser();
     });
 
     //for game
     ws.on('message', function(msg) {
+        
+        console.log(req.session);
+        req.session.cookie.views++;
         var res = {
             buttonIndex: -1,
             update:      false,
