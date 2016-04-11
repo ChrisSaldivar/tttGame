@@ -7,8 +7,6 @@ var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
 var session     = require('express-session'); //used for user sessions
-var flash       = require('connect-flash'); //used for flashing messages to clients
-var cookieParser= require('cookie-parser'); //used to read cookies
 var password    = require('password-hash-and-salt'); //used for hashing password
 
 

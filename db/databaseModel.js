@@ -45,7 +45,7 @@ var Users = function(){
                     console.log("\nNOT IN TABLE",res);
                 }
             });
-        });
+        }); 
         console.log('Update Done');
     };
 
