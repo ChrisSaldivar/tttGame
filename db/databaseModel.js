@@ -1,6 +1,10 @@
 var password = require('password-hash-and-salt');
+var crypto = require('crypto');
+
 
 var Users = function(){
+    Users.clients = {};
+    
     Users.sqlite3 = require('sqlite3').verbose();
     Users.db      = new Users.sqlite3.Database('users.db'); //open or create database
 
@@ -26,6 +30,27 @@ var Users = function(){
         });
     };
 
+    Users.updateWinsandLosses = function(username, won, lost){
+        Users.db.serialize(function(username,won,lost){
+            Users.db.get('SELECT wins FROM users WHERE username = ?;', [won], function(err, wins){
+                if(wins != null){
+                    Users.db.run("UPDATE users SET wins = ? WHERE username = ?;",[++wins,won]);
+                }
+                else{
+                    console.log("\nNOT IN TABLE",res);
+                }
+            });
+            Users.db.get('SELECT losses FROM users WHERE username = ?;', [lost], function(err, losses){
+                if(losses != null){
+                    Users.db.run("UPDATE users SET losses = ? WHERE username = ?;",[++losses,lost]);
+                }
+                else{
+                    console.log("\nNOT IN TABLE",res);
+                }
+            });
+        }); 
+        console.log('Update Done');
+    };
 
     Users.remove  = function(username){
         Users.db.serialize(function(){
@@ -33,12 +58,12 @@ var Users = function(){
         });
     };
 
-    Users.verifyUser = function(username, password, ws){
+    Users.verifyUser = function(username, password, ws, req){
         Users.db.serialize(function(){
             Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
                 var res = {redirect: false, url:  ''};
                 if(row != null){
-                    verifyPass(password, row.hash, ws, res);
+                    verifyPass(username, password, row.hash, row.wins, row.losses, ws, res, req);
                 }
                 else{
                     console.log("\nNOT IN TABLE",res);
@@ -60,19 +85,27 @@ var Users = function(){
     return Users;
 };
 
-function verifyPass (pass, hash, ws, res){
+function verifyPass (username, pass, hash, wins, losses, ws, res, req){
     console.log("pass is:",pass);
     // Verifying a hash 
 	password(pass).verifyAgainst(hash, function(error, verified) {
-        console.log("\nverified hash", hash);
         if (error)
             console.log("error");
 		if(verified) {
+            var id = crypto.randomBytes(20);
+            Users.clients[id] = {
+                username: username,
+                ws:       ws,
+                wins:     wins,
+                loss:     losses,
+                playing:  false,
+                expire:   0 // add date object + 30 min
+            };
+            res.id = id;
 			res.redirect = true;
             res.url = 'http://chrisds.koding.io/main.html';
-            // msg.url = 'localhost:3000/main.html';
+            // res.url = 'localhost:3000/main.html';
 		}
-		console.log("\nFROM VERIFY PASS",res);
 		ws.send(JSON.stringify(res));
 	});
 }

@@ -6,6 +6,8 @@ var buttons = [];
 var text;
 var canPlay = true;
 
+
+
 var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
 //  var ws = new WebSocket('ws://localhost:3000/game');
 
@@ -16,10 +18,11 @@ function elt(id){
 }
 
 ws.onopen = function() {
-    var msg = {status: "Connection good.", firstConnection: true};
+    id = localStorage.getItem('id');
+    var msg = {status: "open", id: id};
     ws.send(JSON.stringify(msg));
-    msg  = {cmd: "post message", value: ":Welcome [username here]!"};
-    ws.send(JSON.stringify(msg));
+    // msg  = {cmd: "post message", value: ":Welcome [username here]!"};
+    // ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {
@@ -29,6 +32,7 @@ ws.onmessage = function(event) {
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
     if (message.cmd === 'post message'){
+        console.log("post");
         addChatMessage(message);
     }
     if (message.label){
@@ -51,12 +55,15 @@ ws.onmessage = function(event) {
 };
 
 function postMessage (){
-    // console.log("clicked");
+    console.log(localStorage.getItem('id'));
     var text = elt("chatText").value;
     elt("chatText").value = "";
     text = text.replace(/\r?\n/g, '<br>');
-    var msg  = {cmd: "post message", value: '[sender username]: ' + text.trim()};
-    msg.id = id;
+    var msg  = {
+        cmd: "post message", 
+        value: text.trim(),
+        id: localStorage.getItem('id')
+    };
     ws.send(JSON.stringify(msg));
 }
 
@@ -73,7 +80,7 @@ function addChatMessage (message){
     var messageList = elt("chat-list");
     
     var new_message = elt('message-template').content.cloneNode(true);
-    new_message.querySelector(".message-text").innerHTML = message.value;
+    new_message.querySelector(".message-text").innerHTML = "[" + message.senderName + "]: " + message.value;
     
     messageList.appendChild(new_message);
     

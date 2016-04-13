@@ -21,3 +21,4 @@ Possible
 4) clean up code
 5) add winstreak
 6) use emails in user registration
+7) persist game when server goes down

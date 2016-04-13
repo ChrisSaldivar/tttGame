@@ -1,5 +1,7 @@
-//var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
-  var ws = new WebSocket('ws://localhost:3000/auth');
+var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+//   var ws = new WebSocket('ws://localhost:3000/auth');
+
+localStorage.setItem('id', 'it works');
 
 function submitInfo(){
     var message = {
@@ -23,6 +25,7 @@ ws.onmessage = function(event) {
     elt("password").value = "";
     console.log(msg);
     if (msg.redirect){
+        ws.send(JSON.stringify({a: "logged in"}));
         redirect(msg);
     }
     else{
@@ -37,7 +40,9 @@ function elt(id){
 
 function redirect(msg){
     console.log(msg.url);
-    window.location = msg.url;
+    localStorage.setItem('id', msg.id);
+    console.log(msg.id);
+    // window.location = msg.url;
 }
 
 function displayError(){

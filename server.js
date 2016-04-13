@@ -1,38 +1,31 @@
 var Users = require(__dirname + '/db/databaseModel.js');
 var ttt   = require(__dirname + '/public/js/ttt.js');
 
-
 //server using express beginning of project
 var express     = require('express');
 var app         = express(); //create express object
 var expressWs   = require('express-ws')(app); //create express websocket extension
-var session     = require('express-session'); //used for user sessions
-var flash       = require('connect-flash'); //used for flashing messages to clients
 var password    = require('password-hash-and-salt'); //used for hashing password
 
-app.use(session({ 
-    secret: 'keyboard cat',
-    resave: true, 
-    saveUninitialized: true,
-    cookie: { 
-        maxAge: 60000,
-        views: 1 
-    }
-}));
+
 
 var gameStarted = false;
-var clients = {};
+
 var User = Users();
 User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
+    // console.log(req.mySession);
+    // console.log("\nviews:",req.mySesion.view++,"\n");
+    
+    ws.on ('connect', function(){
+        console.log("connection made /auth");
+    });
     //check for valid login
     ws.on('message', function(msg){
-        console.log(msg);
         msg = JSON.parse(msg);
-        
         if (msg.cmd === 'login'){
-            User.verifyUser(msg.username, msg.password, ws);
+            User.verifyUser(msg.username, msg.password, ws, req);
         }
     });
     
@@ -67,6 +60,9 @@ var previousPlayer = {label: "player2", token: "O", id: ""};
 var moveNumber     = 1;
 var player         = 1;
 var pastMoves      = Array();
+var p1;
+var p2;
+
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -74,16 +70,13 @@ function Move (frame, index){
 }
 
 app.ws('/game', function(ws, req) { //socket route for game requests
-    
+
     ws.on('close', function(code, msg){
         removeUser();
     });
 
     //for game
     ws.on('message', function(msg) {
-        
-        console.log(req.session);
-        req.session.cookie.views++;
         var res = {
             buttonIndex: -1,
             update:      false,
@@ -95,36 +88,54 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         console.log(msg);
         
         if (msg.cmd === 'post message'){
+            
+            console.log('post message clients:', User.clients);
             if (msg.value.match(/:.+/)){
-                broadcast(msg);
+                res = {
+                    value: msg.value,
+                    senderName: User.clients[msg.id].username
+                };
+                broadcast(res);
             }
         }
         else if (msg.status){
             console.log("Status: " + msg.status);
-            if (msg.firstConnection){
-                var id = randomString();
-                if (player < 3){
-                    var firstConnectRes = {label: "player" + player++, id: id};
-                    if (player == 1){
-                        currentPlayer.id = id;
-                    }
-                    else{
-                        previousPlayer.id = id;
-                    }
-                    console.log(firstConnectRes.label, "has joined");
-                    ws.send(JSON.stringify(firstConnectRes));
+            
+            if(msg.status === 'open'){
+                if(User.clients[msg.id]){
+                    delete User.clients[msg.id].ws;
+                    User.clients[msg.id].ws = ws;
+                    // EXTEND EXPIRE DATE
                 }
-                else{
-                    var spectatorRes = {label: "spectator", id: id};
-                    console.log(spectatorRes.label,"has joined");
-                    if (gameStarted){
-                        spectatorRes.pastMoves   = pastMoves;
-                        spectatorRes.gameStarted = gameStarted;
-                    }
-                    ws.send(JSON.stringify(spectatorRes));
-                }
-                clients[id] = ws;
             }
+            
+            // if (msg.firstConnection){
+            //     var id = randomString();
+            //     if (player < 3){
+            //         var firstConnectRes = {label: "player" + player++, id: id};
+            //         if (player == 2){
+            //             console.log("in here");
+            //             p1 = ws;
+            //             currentPlayer.id = id;
+            //         }
+            //         else if (player == 3){
+            //             p2 = ws;
+            //             previousPlayer.id = id;
+            //         }
+            //         console.log(firstConnectRes.label, "has joined");
+            //         ws.send(JSON.stringify(firstConnectRes));
+            //     }
+            //     else{
+            //         var spectatorRes = {label: "spectator", id: id};
+            //         console.log(spectatorRes.label,"has joined");
+            //         if (gameStarted){
+            //             spectatorRes.pastMoves   = pastMoves;
+            //             spectatorRes.gameStarted = gameStarted;
+            //         }
+            //         ws.send(JSON.stringify(spectatorRes));
+            //     }
+            //     User.clients[id] = ws;
+            // }
         }
         else if (msg.cmd === 'play move'){
             buttonRow    = msg.row;
@@ -149,12 +160,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 
 function removeUser (){
     var id;
-    for (id in clients){
+    for (id in User.clients){
         try{
-            clients[id].send(JSON.stringify({test: "t"}));
+            User.clients[id].ws.send(JSON.stringify({test: "t"}));
         }
         catch(INVALID_STATE_ERR){
-            delete clients[id];
+            delete User.clients[id];
         }
     }
 }
@@ -199,8 +210,9 @@ function checkGameOver (res){
 }
 
 function broadcast (res){
-    for (var id in clients){
-        clients[id].send(JSON.stringify(res));
+    console.log("\n\nbroadcast clients: ", User.clients, "\n\n");
+    for (var id in User.clients){
+        User.clients[id].ws.send(JSON.stringify(res));
     }
 }
 
