@@ -31,7 +31,7 @@ ws.onmessage = function(event) {
     // console.log("time: " + (end-start));
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
-    if (message.cmd === 'post message'){
+    if (message.value){
         console.log("post");
         addChatMessage(message);
     }
@@ -65,15 +65,6 @@ function postMessage (){
         id: localStorage.getItem('id')
     };
     ws.send(JSON.stringify(msg));
-}
-
-function keyPress(){
-    e = window.event;
-    console.log(e.key);
-    if (e.key === 'Enter'){
-        console.log("pressed enter");
-        elt('chatButton').click();
-    }
 }
 
 function addChatMessage (message){

@@ -86,13 +86,12 @@ var Users = function(){
 };
 
 function verifyPass (username, pass, hash, wins, losses, ws, res, req){
-    console.log("pass is:",pass);
     // Verifying a hash 
 	password(pass).verifyAgainst(hash, function(error, verified) {
         if (error)
             console.log("error");
 		if(verified) {
-            var id = crypto.randomBytes(20);
+            var id = crypto.randomBytes(20).toString('hex');
             Users.clients[id] = {
                 username: username,
                 ws:       ws,

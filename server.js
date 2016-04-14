@@ -72,7 +72,7 @@ function Move (frame, index){
 app.ws('/game', function(ws, req) { //socket route for game requests
 
     ws.on('close', function(code, msg){
-        removeUser();
+        // removeUser();
     });
 
     //for game
@@ -88,13 +88,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         console.log(msg);
         
         if (msg.cmd === 'post message'){
-            
-            console.log('post message clients:', User.clients);
-            if (msg.value.match(/:.+/)){
+            if (msg.value){
                 res = {
                     value: msg.value,
                     senderName: User.clients[msg.id].username
                 };
+                console.log("post message",res);
                 broadcast(res);
             }
         }
@@ -161,25 +160,10 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 function removeUser (){
     var id;
     for (id in User.clients){
-        try{
-            User.clients[id].ws.send(JSON.stringify({test: "t"}));
-        }
-        catch(INVALID_STATE_ERR){
-            delete User.clients[id];
+        if (User.clients[id].ws.readyState == 3){
+            
         }
     }
-}
-
-/*
-    source: http://stackoverflow.com/a/10727155/5451571
-    user:   Nimphious
-*/
-function randomString() {
-    var chars  = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    var length = 10;
-    var result = '';
-    for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
-    return result;
 }
 
 function playMove (index, res){
@@ -212,7 +196,8 @@ function checkGameOver (res){
 function broadcast (res){
     console.log("\n\nbroadcast clients: ", User.clients, "\n\n");
     for (var id in User.clients){
-        User.clients[id].ws.send(JSON.stringify(res));
+        if (User.clients[id].ws.readyState == 1)
+            User.clients[id].ws.send(JSON.stringify(res));
     }
 }
 

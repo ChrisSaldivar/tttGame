@@ -1,8 +1,6 @@
 var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
 //   var ws = new WebSocket('ws://localhost:3000/auth');
 
-localStorage.setItem('id', 'it works');
-
 function submitInfo(){
     var message = {
         cmd:      'login',
@@ -42,7 +40,7 @@ function redirect(msg){
     console.log(msg.url);
     localStorage.setItem('id', msg.id);
     console.log(msg.id);
-    // window.location = msg.url;
+    window.location = msg.url;
 }
 
 function displayError(){
