@@ -85,19 +85,30 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 
     //for game
     ws.on('message', function(msg) {
-        var res = {
-            buttonIndex: -1,
-            update:      false,
-            buttonFrame: -1,
-            gameOver:    false,
-            result:      ""
-        };
+        
         msg = JSON.parse(msg);
         console.log(msg);
         
-        if (msg.cmd === 'post message'){
+        console.log("\n\nClients", User.clients);
+        if (msg.cmd === 'open'){
+            var user = User.clients[msg.id];
+            if (user && user.expire > Date.now()){
+                delete User.clients[msg.id].ws;
+                User.clients[msg.id].ws = ws;
+                user.expire = Date.now() + 1000*60*60;
+            }
+            else{
+                var res = { 
+                    redirect: true,
+                    url:  'http://chrisds.koding.io/index.html'
+                    // res.url = 'localhost:3000/main.html';
+                };
+                ws.send(JSON.stringify(res));
+            }
+        }
+        else if (msg.cmd === 'post message'){
             if (msg.value){
-                res = {
+                var res = {
                     value: msg.value,
                     senderName: User.clients[msg.id].username
                 };
@@ -108,13 +119,6 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         else if (msg.status){
             console.log("Status: " + msg.status);
             
-            if(msg.status === 'open'){
-                if(User.clients[msg.id]){
-                    delete User.clients[msg.id].ws;
-                    User.clients[msg.id].ws = ws;
-                    // EXTEND EXPIRE DATE
-                }
-            }
             
             // if (msg.firstConnection){
             //     var id = randomString();
@@ -145,6 +149,13 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             // }
         }
         else if (msg.cmd === 'play move'){
+            var res = {
+                buttonIndex: -1,
+                update:      false,
+                buttonFrame: -1,
+                gameOver:    false,
+                result:      ""
+            };
             buttonRow    = msg.row;
             buttonCol    = msg.col;
             index        = buttonRow * 3 + buttonCol;

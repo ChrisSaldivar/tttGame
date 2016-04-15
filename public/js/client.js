@@ -19,7 +19,7 @@ function elt(id){
 
 ws.onopen = function() {
     id = localStorage.getItem('id');
-    var msg = {status: "open", id: id};
+    var msg = {cmd: "open", id: id};
     ws.send(JSON.stringify(msg));
     // msg  = {cmd: "post message", value: ":Welcome [username here]!"};
     // ws.send(JSON.stringify(msg));
@@ -31,11 +31,15 @@ ws.onmessage = function(event) {
     // console.log("time: " + (end-start));
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
-    if (message.value){
+    
+    if (message.redirect){
+        window.location = message.url;
+    }
+    else if (message.value){
         console.log("post");
         addChatMessage(message);
     }
-    if (message.label){
+    else if (message.label){
         id = message.id;
         label = message.label;
         if (message.label === 'spectator'){

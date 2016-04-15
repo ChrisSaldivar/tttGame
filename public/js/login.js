@@ -43,8 +43,10 @@ function elt(id){
 
 function redirect(msg){
     console.log(msg.url);
-    localStorage.setItem('id', msg.id);
-    console.log(msg.id);
+    if (msg.id){
+        localStorage.setItem('id', msg.id);
+        console.log(msg.id);
+    }
     window.location = msg.url;
 }
 

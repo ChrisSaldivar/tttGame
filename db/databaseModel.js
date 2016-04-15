@@ -92,6 +92,7 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
             console.log("error");
 		if(verified) {
             var id = crypto.randomBytes(20).toString('hex');
+            console.log("\nNew id", id);
             Users.clients[id] = {
                 username: username,
                 ws:       ws,
