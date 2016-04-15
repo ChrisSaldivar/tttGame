@@ -149,6 +149,18 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             // }
         }
         else if (msg.cmd === 'play move'){
+            
+            /*
+            
+                choose 2 players
+                move the 2 players from User.clients to players[]
+                players = [player1, player2]
+                currentPlayer = 0
+                if (user == players[currentPlayer])
+                    play move
+                        currentPlayer = (currentPlayer === 0) ? 1 : 0;
+            
+            */
             var res = {
                 buttonIndex: -1,
                 update:      false,

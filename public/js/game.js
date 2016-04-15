@@ -35,7 +35,7 @@ function generateButtons(){
 
 function actionOnClick(button){
     if (!gameOver && canPlay && messageRecieved){
-        var msg = {cmd: 'play move', row: button.row, col: button.col, playerLabel: label, id: id};
+        var msg = {cmd: 'play move', row: button.row, col: button.col, id: id};
         // start = window.performance.now();
         messageRecieved = false;
         waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
