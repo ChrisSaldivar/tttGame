@@ -23,7 +23,10 @@ var Users = function(){
                 console.log("\nHASH:",hash);
                 var res = {redirect: false};
                 if (!err){
-                    res = {redirect: true, url: "http://chrisds.koding.io"};
+                    res = {
+                        redirect: true, 
+                        url: "http://chrisds.koding.io"
+                    };
                 }
                 ws.send(JSON.stringify(res));
             });
@@ -63,6 +66,12 @@ var Users = function(){
             Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
                 var res = {redirect: false, url:  ''};
                 if(row != null){
+                    var user = {
+                        name: row.username,
+                        hash: row.hash,
+                        wins: row.wins,
+                        losses: row.losses
+                    }
                     verifyPass(username, password, row.hash, row.wins, row.losses, ws, res, req);
                 }
                 else{
