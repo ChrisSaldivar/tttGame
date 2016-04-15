@@ -98,7 +98,7 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
                 wins:     wins,
                 loss:     losses,
                 playing:  false,
-                expire:   0 // add date object + 30 min
+                expire:   Date.now() + 1000*60*60 // 1 hour session
             };
             res.id = id;
 			res.redirect = true;

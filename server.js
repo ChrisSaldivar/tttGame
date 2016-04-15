@@ -15,21 +15,29 @@ var User = Users();
 User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
-    // console.log(req.mySession);
-    // console.log("\nviews:",req.mySesion.view++,"\n");
     
-    ws.on ('connect', function(){
-        console.log("connection made /auth");
-    });
+    
     //check for valid login
     ws.on('message', function(msg){
         msg = JSON.parse(msg);
+        console.log("msg: ", msg);
         if (msg.cmd === 'login'){
             User.verifyUser(msg.username, msg.password, ws, req);
         }
+        else if (msg.cmd === 'open'){
+            var user = User.clients[msg.id];
+            if (user && user.expire > Date.now()){
+                user.expire = Date.now() + 1000*60*60;
+                var res = { 
+                    redirect: true,
+                    url:  'http://chrisds.koding.io/main.html'
+                    // res.url = 'localhost:3000/main.html';
+                };
+                ws.send(JSON.stringify(res));
+            }
+        }
     });
     
-    console.log('Login Good.');
 });
 
 app.ws('/newUser', function(ws, req) { //route for checking new user login

@@ -1,6 +1,8 @@
 var ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
 //   var ws = new WebSocket('ws://localhost:3000/auth');
 
+var id = localStorage.getItem('id');
+
 function submitInfo(){
     var message = {
         cmd:      'login',
@@ -13,8 +15,12 @@ function submitInfo(){
 }
 
 ws.onopen = function() {
-    var msg = {status: "Connection good."};
-    ws.send(JSON.stringify(msg));
+    
+    if (id != null){
+        var msg = {cmd: 'open', id: id};
+        console.log("open sending:", msg);
+        ws.send(JSON.stringify(msg));
+    }
 };
 
 ws.onmessage = function(event) {
@@ -23,7 +29,6 @@ ws.onmessage = function(event) {
     elt("password").value = "";
     console.log(msg);
     if (msg.redirect){
-        ws.send(JSON.stringify({a: "logged in"}));
         redirect(msg);
     }
     else{
