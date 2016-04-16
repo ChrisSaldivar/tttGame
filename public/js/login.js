@@ -48,7 +48,7 @@ function redirect(msg){
         localStorage.setItem('id', msg.id);
         console.log(msg.id);
     }
-    //window.location = msg.url;
+    window.location = msg.url;
 }
 
 function displayError(){

@@ -9,7 +9,7 @@ var canPlay = true;
 
 
 //var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-  var ws = new WebSocket('ws://localhost:3000/game');
+var ws = new WebSocket('ws://localhost:3000/game');
 
 var message = ''; //will hold response from server
 
@@ -56,6 +56,9 @@ ws.onmessage = function(event) {
             endGame(message.result);
         }
     }
+    else if (message.updateLeaderBoard){
+        updateLeaderBoard(message);
+    }
 };
 
 function postMessage (){
@@ -84,6 +87,22 @@ function addChatMessage (message){
     }
     messageList.scrollTop = messageList.scrollHeight;
 }
+
+function updateLeaderBoard(message){
+    var leaderboard = elt("leaderboard-list");
+
+    while(leaderboard.firstChild){ //clear old leader board
+        leaderboard.removeChild(leaderboard.firstChild);
+    }
+
+    for (var i = 1; i < message.length; i++){
+        var new_leader = elt('leaderboard-template').content.cloneNode(true);
+        new_leader.querySelector(".leaderboard-text").innerHTML = i + ". " + message[i];
+        leaderboard.appendChild(new_leader);
+    }
+    leaderboard.scrollTop = leaderboard.scrollHeight;
+}
+
 
 window.onload = console.log("loading");
 

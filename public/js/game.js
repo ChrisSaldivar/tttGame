@@ -8,7 +8,10 @@ function create (){
     background = game.add.tileSprite(0, 0, 700, 500, 'background');
     
     generateButtons();
-    
+
+    var msg = {};
+    msg.cmd = "update leaderboard";
+    ws.send(JSON.stringify(msg.cmd));
 }
 
 function preload(){

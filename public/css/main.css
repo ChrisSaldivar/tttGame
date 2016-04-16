@@ -21,15 +21,33 @@
   top:550px;
 }
 
+#leaderboard-list{
+  position: absolute;
+  top: 464px;
+  left: 725px;
+  border: 1px solid black;
+  overflow: auto;
+  width: 600px;
+  height: 151px;
+}
+
 #chat-list{
   overflow: auto;
-  height: 615px;
+  /*height: 615px;*/
+  height: 455px;
   width: 600px;
   border: 1px solid black;
   position:absolute;
   top: 8px;
   left:725px;
-  border: 1px sold black;
+  border: 1px solid black;
+}
+
+.leaderboard-wrapper{
+  border: 1px solid grey;
+  width: 600px;
+  display: inline-block;
+  word-wrap: break-word;
 }
 
 .message-wrapper {

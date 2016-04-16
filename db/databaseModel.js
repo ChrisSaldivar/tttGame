@@ -26,7 +26,7 @@ var Users = function(){
 
                     res = {
                         redirect: true, 
-                        url: "http://chrisds.koding.io"
+                        //url: "http://chrisds.koding.io"
                         url: "http://localhost:3000"
                     };
                 }
@@ -84,14 +84,15 @@ var Users = function(){
         });
     };
 
-    Users.showLeaderBoard = function(){
+    Users.showLeaderBoard = function(ws){
+        var msg = {};
+        msg.updateLeaderBoard = "post leaderboard";
         Users.db.serialize(function(){
             Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
-               /*
-                * Show players on leaderboard
-                */
+               msg[row.id] = row.username;
             });
         });
+        ws.send(JSON.stringify(msg));
     };
     return Users;
 };
@@ -115,7 +116,7 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
             res.id = id;
 			res.redirect = true;
             //res.url = 'http://chrisds.koding.io/main.html';
-             res.url = 'localhost:3000/main.html';
+             res.url = 'http://localhost:3000/main.html';
 		}
 		ws.send(JSON.stringify(res));
 	});
