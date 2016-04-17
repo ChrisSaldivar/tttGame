@@ -116,7 +116,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 broadcast(res);
             }
         }
-        else if (msg.cmd === "update leaderboard"){
+        else if (msg.cmd === 'update leaderboard'){
             User.showLeaderBoard(ws);
         }
         else if (msg.status){

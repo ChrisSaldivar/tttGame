@@ -1,6 +1,14 @@
 var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 var background;
 var gameOver = false;
+var ws = new WebSocket('ws://localhost:3000/game');
+
+//for testing
+// ws.onopen = function (){
+//     var msg = {};
+//     msg.cmd = "update leaderboard";
+//     ws.send(JSON.stringify(msg.cmd));
+// }
 
 function create (){
     console.log("Creating");
@@ -10,8 +18,9 @@ function create (){
     generateButtons();
 
     var msg = {};
-    msg.cmd = "update leaderboard";
-    ws.send(JSON.stringify(msg.cmd));
+    msg.cmd = 'update leaderboard';
+    ws.send(JSON.stringify(msg));
+    // waitForSocketConnection(ws, function(){ws.send(JSON.stringify(msg.cmd));});
 }
 
 function preload(){
@@ -68,4 +77,23 @@ function displayPastMoves(message){
 function reset(){
     buttons = Array();
     create();
+}
+
+// Make the function wait until the connection is made...
+function waitForSocketConnection(socket, callback){
+     setTimeout(
+         function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made");
+                if(callback !== null){
+                    callback();
+                }
+                return;
+
+            } else {
+                console.log("wait for connection...");
+                waitForSocketConnection(socket, callback);
+            }
+
+         }, 5); // wait 5 milisecond for the connection...
 }

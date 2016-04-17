@@ -91,16 +91,28 @@ function addChatMessage (message){
 function updateLeaderBoard(message){
     var leaderboard = elt("leaderboard-list");
 
+
     while(leaderboard.firstChild){ //clear old leader board
         leaderboard.removeChild(leaderboard.firstChild);
     }
-
-    for (var i = 1; i < message.length; i++){
+    for (var i = 0; i < 11; i++){
         var new_leader = elt('leaderboard-template').content.cloneNode(true);
-        new_leader.querySelector(".leaderboard-text").innerHTML = i + ". " + message[i];
+        if (i === 0){
+            new_leader.querySelector(".leaderboard-text").innerHTML = '<center><strong>Leaderboard</strong></center><br/>';
+        }
+        else if (message[i]){
+            // var new_leader = elt('leaderboard-template').content.cloneNode(true);
+            new_leader.querySelector(".leaderboard-text").innerHTML = i + ". " + message[i];
+            // leaderboard.appendChild(new_leader);
+        }
+        else{
+            new_leader.querySelector(".leaderboard-text").innerHTML = i + '.';
+        }
         leaderboard.appendChild(new_leader);
     }
-    leaderboard.scrollTop = leaderboard.scrollHeight;
+    // var new_leader = elt('leaderboard-template').content.cloneNode(true);
+    // new_leader.querySelector(".leaderboard-text").innerHTML = message.
+    // leaderboard.scrollTop = leaderboard.scrollHeight;
 }
 
 

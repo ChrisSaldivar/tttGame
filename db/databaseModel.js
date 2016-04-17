@@ -85,14 +85,26 @@ var Users = function(){
     };
 
     Users.showLeaderBoard = function(ws){
-        var msg = {};
-        msg.updateLeaderBoard = "post leaderboard";
         Users.db.serialize(function(){
+            var msg = {};
+            msg.updateLeaderBoard = "post leaderboard";
+            // var send = true;
             Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
-               msg[row.id] = row.username;
+                if (row != null){
+                    msg[row.id] = row.username;
+                    //test
+                    ws.send(JSON.stringify(msg));
+                    console.log("Leaderboard update sent.", msg);
+                }
+                // else{
+                //     send = false;
+                // }
             });
+            // if (send){
+            //     ws.send(JSON.stringify(msg));
+            //     console.log("Leaderboard update sent.", msg);
+            // }
         });
-        ws.send(JSON.stringify(msg));
     };
     return Users;
 };
