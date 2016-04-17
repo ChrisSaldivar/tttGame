@@ -53,6 +53,11 @@
   height: 160px;
 }
 
+#center2{
+  display: inline;
+  margin-left: 5.3em;
+}
+
 .leaderboard-wrapper{
   border: 1px solid grey;
   width: 300px;

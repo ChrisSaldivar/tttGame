@@ -98,21 +98,21 @@ function updateLeaderBoard(message){
     for (var i = 0; i < 11; i++){
         var new_leader = elt('leaderboard-template').content.cloneNode(true);
         if (i === 0){
-            new_leader.querySelector(".leaderboard-text").innerHTML = '<center><strong>Leaderboard</strong></center><br/>';
+            new_leader.querySelector(".leaderboard-text").innerHTML = '<center id=center1><strong>Leaderboard</strong></center><br/>';
         }
         else if (message[i]){
-            // var new_leader = elt('leaderboard-template').content.cloneNode(true);
-            new_leader.querySelector(".leaderboard-text").innerHTML = i + ". " + message[i];
-            // leaderboard.appendChild(new_leader);
+            if (i === 10){
+                new_leader.querySelector(".leaderboard-text").innerHTML = i + "." + '<center id=center2>' + message[i] + '</center>';
+            }
+            else{
+                new_leader.querySelector(".leaderboard-text").innerHTML = i + ". &nbsp" + '<center id=center2>' + message[i] + '</center>';
+            }
         }
         else{
             new_leader.querySelector(".leaderboard-text").innerHTML = i + '.';
         }
         leaderboard.appendChild(new_leader);
     }
-    // var new_leader = elt('leaderboard-template').content.cloneNode(true);
-    // new_leader.querySelector(".leaderboard-text").innerHTML = message.
-    // leaderboard.scrollTop = leaderboard.scrollHeight;
 }
 
 
