@@ -6,7 +6,11 @@ var buttons = [];
 var text;
 var canPlay = true;
 
-
+function getLeaderBoard(){
+    var msg = {};
+    msg.cmd = 'update leaderboard';
+    ws.send(JSON.stringify(msg));
+}
 
 //var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
  var ws = new WebSocket('ws://localhost:3000/game');
@@ -21,8 +25,6 @@ ws.onopen = function() {
     id = localStorage.getItem('id');
     var msg = {cmd: "open", id: id};
     ws.send(JSON.stringify(msg));
-    // msg  = {cmd: "post message", value: ":Welcome [username here]!"};
-    // ws.send(JSON.stringify(msg));
 };
 
 ws.onmessage = function(event) {

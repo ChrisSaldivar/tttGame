@@ -1,7 +1,6 @@
 var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 var background;
 var gameOver = false;
-var ws = new WebSocket('ws://localhost:3000/game');
 
 //for testing
 // ws.onopen = function (){
@@ -17,10 +16,6 @@ function create (){
     
     generateButtons();
 
-    var msg = {};
-    msg.cmd = 'update leaderboard';
-    ws.send(JSON.stringify(msg));
-    // waitForSocketConnection(ws, function(){ws.send(JSON.stringify(msg.cmd));});
 }
 
 function preload(){
@@ -76,6 +71,7 @@ function displayPastMoves(message){
 
 function reset(){
     buttons = Array();
+    getLeaderBoard();
     create();
 }
 

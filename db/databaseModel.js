@@ -23,6 +23,7 @@ var Users = function(){
                 console.log("\nHASH:",hash);
                 var res = {redirect: false};
                 if (!err){
+
                     res = {
                         redirect: true, 
                         //url: "http://chrisds.koding.io"
@@ -83,13 +84,26 @@ var Users = function(){
         });
     };
 
-    Users.showLeaderBoard = function(){
+    Users.showLeaderBoard = function(ws){
         Users.db.serialize(function(){
+            var msg = {};
+            msg.updateLeaderBoard = "post leaderboard";
+            // var send = true;
             Users.db.each('SELECT * FROM users ORDER BY wins DESC LIMIT 10;', function(err, row){ //get top 10 players
-               /*
-                * Show players on leaderboard
-                */
+                if (row != null){
+                    msg[row.id] = row.username;
+                    //test
+                    ws.send(JSON.stringify(msg));
+                    console.log("Leaderboard update sent.", msg);
+                }
+                // else{
+                //     send = false;
+                // }
             });
+            // if (send){
+            //     ws.send(JSON.stringify(msg));
+            //     console.log("Leaderboard update sent.", msg);
+            // }
         });
     };
     return Users;
@@ -115,6 +129,7 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
 			res.redirect = true;
             //res.url = 'http://chrisds.koding.io/main.html';
              res.url = 'localhost:3000/main.html';
+
 		}
 		ws.send(JSON.stringify(res));
 	});
