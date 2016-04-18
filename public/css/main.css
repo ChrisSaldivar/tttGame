@@ -31,6 +31,12 @@
   height: 160px;
 }
 
+#donatebutton{
+  position: absolute;
+  left:80px;
+  top:70px;
+}
+
 #chat-list{
   overflow: auto;
   /*height: 615px;*/

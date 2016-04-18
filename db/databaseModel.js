@@ -35,8 +35,8 @@ var Users = function(){
         });
     };
 
-    Users.updateWinsandLosses = function(username, won, lost){
-        Users.db.serialize(function(username,won,lost){
+    Users.updateWinsandLosses = function(won, lost){
+        Users.db.serialize(function(won,lost){
             Users.db.get('SELECT wins FROM users WHERE username = ?;', [won], function(err, wins){
                 if(wins != null){
                     Users.db.run("UPDATE users SET wins = ? WHERE username = ?;",[++wins,won]);
