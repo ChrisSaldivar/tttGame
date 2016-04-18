@@ -30,8 +30,8 @@ app.ws('/auth', function(ws, req) { //route for checking user login
                 user.expire = Date.now() + 1000*60*60;
                 var res = { 
                     redirect: true,
-                    //url:  'http://chrisds.koding.io/main.html'
-                    url:  'http://localhost:3000/main.html'
+                    url:  'http://chrisds.koding.io/main.html'
+                    // url:  'http://localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -100,8 +100,8 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             else{
                 var res = { 
                     redirect: true,
-                    //url:  'http://chrisds.koding.io/index.html'
-                    url: 'localhost:3000/main.html'
+                    url:  'http://chrisds.koding.io/index.html'
+                    // url: 'localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -215,14 +215,37 @@ function playMove (index, res){
 
 function checkGameOver (res){
     var winner = ttt.checkWin();
+    // var player1 = players[0];
+    // var player2 = players[1];
     if (winner === "" && moveNumber == 10){
+        /*
+            player1.losses++;
+            player2.losses++;
+        */
         res.result   = 'It\'s a tie';
         res.gameOver = true;
-        reset();
     }
     else if (winner !== ""){
+        /*
+            if (winner === 'X'){
+                player1.wins++;
+                player2.losses++;
+            }
+            else{
+                player2.wins++;
+                player1.losses++;
+            }
+        */
         res.result = 'Winner is: ' + winner;
         res.gameOver = true;
+    }
+    if (res.gameOver){
+        /*
+            player1.plays++;
+            player2.plays++;
+            updateWinsandLosses(player1.name, player1.wins, player1.loses, player1.plays);
+            updateWinsandLosses(player1.name, player2.wins, player2.loses, player2.plays);
+        */
         reset();
     }
 }
