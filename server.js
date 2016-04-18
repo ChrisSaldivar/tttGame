@@ -89,7 +89,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         msg = JSON.parse(msg);
         console.log(msg);
         
-        console.log("\n\nClients", User.clients);
+        console.log("\n\nClients", User.clients[0]);
         if (msg.cmd === 'open'){
             var user = User.clients[msg.id];
             if (user && user.expire > Date.now()){
