@@ -128,7 +128,7 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
             res.id = id;
 			res.redirect = true;
             //res.url = 'http://chrisds.koding.io/main.html';
-             res.url = 'localhost:3000/main.html';
+             res.url = 'http://localhost:3000/main.html';
 
 		}
 		ws.send(JSON.stringify(res));
