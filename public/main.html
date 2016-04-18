@@ -13,10 +13,17 @@
 		Chat:<br/> <textArea id='chatText' type='text' name='inputtext' autofocus></textArea> <button type='button' id='chatButton' onclick="postMessage()"> Submit </button>
 	</div>
 	<section id='chat-list'>  </section>
+	<section id='leaderboard-list'></section>
+	<section id='donate-box'><center>Donate</center></section> <!--We have to look into how to do this.-->
 </body>
 <template id="message-template">
     <div class="message-wrapper">
-        <article class="message-text">blah blah blah</article>
+        <article class="message-text"></article>
     </div>
+</template>
+<template id="leaderboard-template">
+	<div class="leaderboard-wrapper">
+		<article class="leaderboard-text"></article>
+	</div>
 </template>
 </html>

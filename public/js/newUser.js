@@ -1,5 +1,5 @@
-var ws = new WebSocket('ws://chrisds.koding.io:3000/newUser');
-//   var ws = new WebSocket('ws://localhost:3000/newUser');
+//var ws = new WebSocket('ws://chrisds.koding.io:3000/newUser');
+   var ws = new WebSocket('ws://localhost:3000/newUser');
 
 console.log(localStorage.getItem('myCat'));
 localStorage.setItem('myCat','Jerry');

@@ -30,8 +30,8 @@ app.ws('/auth', function(ws, req) { //route for checking user login
                 user.expire = Date.now() + 1000*60*60;
                 var res = { 
                     redirect: true,
-                    url:  'http://chrisds.koding.io/main.html'
-                    // res.url = 'localhost:3000/main.html';
+                    //url:  'http://chrisds.koding.io/main.html'
+                    url:  'http://localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -100,8 +100,8 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             else{
                 var res = { 
                     redirect: true,
-                    url:  'http://chrisds.koding.io/index.html'
-                    // res.url = 'localhost:3000/main.html';
+                    //url:  'http://chrisds.koding.io/index.html'
+                    url: 'localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -115,6 +115,9 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 console.log("post message",res);
                 broadcast(res);
             }
+        }
+        else if (msg.cmd === 'update leaderboard'){
+            User.showLeaderBoard(ws);
         }
         else if (msg.status){
             console.log("Status: " + msg.status);
