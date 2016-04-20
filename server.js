@@ -16,7 +16,6 @@ User.init();
 
 app.ws('/auth', function(ws, req) { //route for checking user login
     
-    
     //check for valid login
     ws.on('message', function(msg){
         msg = JSON.parse(msg);
@@ -71,6 +70,9 @@ var pastMoves      = Array();
 var p1;
 var p2;
 
+while (true){
+    console.log("HI");
+}
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -266,6 +268,60 @@ function reset(){
     gameStarted    = false;
     pastMoves      = Array();
     ttt.reset();
+}
+
+// Sort clients based on times played 
+function compare (a, b){
+    if (a.plays < b.plays){
+        return -1;
+    }
+    if (a.plays > b.plays){
+       return 1;
+    }
+    return 0;
+}
+
+// choose random group based on pareto principle
+function pareto(){
+    var r = Math.random() * (100 - 1) + 1; // random number from [1,100)
+    if (r <= 82.7){
+        return 0;
+    }
+    else if (r > 82.7 && r <= 94.45){
+        return 1;
+    }
+    else if (r > 94.45 && r <= 96.75){
+        return 2;
+    }
+    else if (r > 96.75 && r <= 98.6){
+        return 3;
+    }
+    return 4;
+}
+
+/*
+    Returns a weighted random index in User.clients
+    
+    clients is order in ascending order based on times played
+    lowest  20%	-- 82.70% chance of playing
+    Second  20%	-- 11.75% chance of playing
+    mid     20%	-- 2.30%  chance of playing
+    Fourth  20%	-- 1.85%  chance of playing
+    highest 20%	-- 1.40%  chance of playing
+*/
+function weightedRandom (){
+    User.clients.sort(compare);
+    var group = pareto();
+    var range = Math.floor(User.clients.length * 0.20);
+    var min   = range * group;
+    var max   = range * (group + 1);
+    if (group == 4)
+        max = User.clients.length;
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function unWeightedRandom(){
+    return Math.floor(Math.random() * (User.clients.length));
 }
 
 app.use('/', express.static(__dirname + '/public')); //route to serve static login page
