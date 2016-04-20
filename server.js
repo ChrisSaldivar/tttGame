@@ -67,8 +67,8 @@ var previousPlayer = {label: "player2", token: "O", id: ""};
 var moveNumber     = 1;
 var player         = 1;
 var pastMoves      = Array();
-var p1;
-var p2;
+var player1;
+var player2;
 var afk     = {};
 var players = {};
 var temp    = {};
@@ -90,7 +90,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         msg = JSON.parse(msg);
         console.log(msg);
         
-        console.log("\n\nClients", User.clients);
+        // console.log("\n\nClients", User.clients);
         if (msg.cmd === 'open'){
             var user = User.clients[msg.id];
             if (user && user.expire > Date.now()){
@@ -106,6 +106,13 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                     // url: 'localhost:3000/index.html'
                 };
                 ws.send(JSON.stringify(res));
+            }
+            
+            if (Object.keys(User.clients).length > 1){
+                choosePlayers(2);
+                console.log(players);
+                console.log("player1", player1);
+                console.log("player2", player2);
             }
         }
         else if (msg.cmd === 'post message'){
@@ -316,20 +323,20 @@ function pareto(){
 function weightedRandom (){
     User.clients.sort(compare);
     var group = pareto();
-    var range = Math.floor(User.clients.length * 0.20);
+    var range = Math.floor(Object.keys(User.clients).length * 0.20);
     var min   = range * group;
     var max   = range * (group + 1);
     if (group == 4)
-        max = User.clients.length;
+        max = Object.keys(User.clients).length;
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function unWeightedRandom(){
-    return Math.floor(Math.random() * (User.clients.length));
+    return Math.floor(Math.random() * (Object.keys(User.clients).length));
 }
 
 function choosePlayers (numPlayers){
-    var rand = (User.clients.length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
+    var rand = (Object.keys(User.clients).length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
     removePlayers();                                         // Move losing players to temp array (so they aren't chosen again)
     for (var i = 0; i < numPlayers; i++){                    // choose new players and add them to players array
         var index = rand();
@@ -338,6 +345,10 @@ function choosePlayers (numPlayers){
         delete User.clients[key];
     }
     moveTempToClients();                                    // Add losing players back to User.clients
+    // Save keys for the 2 current players
+    var keys = Object.keys(players);
+    player1  = keys[0];
+    player2  = keys[1];
 }
 
 function removePlayers (){

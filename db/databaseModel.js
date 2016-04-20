@@ -105,7 +105,7 @@ var Users = function(){
                     msg[row.id] = row.username;
                     //test
                     ws.send(JSON.stringify(msg));
-                    console.log("Leaderboard update sent.", msg);
+                    // console.log("Leaderboard update sent.", msg);
                 }
             });
         });
