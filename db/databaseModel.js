@@ -26,8 +26,8 @@ var Users = function(){
 
                     res = {
                         redirect: true, 
-                        url: "http://chrisds.koding.io"
-                        // url: "http://localhost:3000"
+                        //url: "http://chrisds.koding.io"
+                        url: "http://localhost:3000"
                     };
                 }
                 ws.send(JSON.stringify(res));
@@ -127,8 +127,9 @@ function verifyPass (username, pass, hash, wins, losses, ws, res, req){
             };
             res.id = id;
 			res.redirect = true;
-            res.url = 'http://chrisds.koding.io/main.html';
-            //  res.url = 'http://localhost:3000/main.html';
+            //res.url = 'http://chrisds.koding.io/main.html';
+             res.url = 'http://localhost:3000/main.html';
+
 		}
 		ws.send(JSON.stringify(res));
 	});

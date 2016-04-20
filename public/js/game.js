@@ -2,13 +2,6 @@ var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, cre
 var background;
 var gameOver = false;
 
-//for testing
-// ws.onopen = function (){
-//     var msg = {};
-//     msg.cmd = "update leaderboard";
-//     ws.send(JSON.stringify(msg.cmd));
-// }
-
 function create (){
     console.log("Creating");
     gameOver = false;
