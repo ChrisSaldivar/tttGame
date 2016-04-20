@@ -83,6 +83,17 @@ var Users = function(){
             });
         });
     };
+    
+    Users.updatePlayer = function (user, winner){
+        Users.db.serialize(function(user, winner){
+            if (!winner){
+                Users.db.run('UPDATE users Set losses = ?, plays = ?, WHERE username = ?;', [user.losses, user.plays, user.username]);
+            }
+            else{
+                Users.db.run('UPDATE users Set wins = ?, plays = ?, WHERE username = ?;', [user.wins, user.plays, user.username]);
+            }
+        });
+    };
 
     Users.showLeaderBoard = function(ws){
         Users.db.serialize(function(){

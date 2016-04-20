@@ -255,8 +255,13 @@ function checkGameOver (res){
 function broadcast (res){
     // console.log("\n\nbroadcast clients: ", User.clients, "\n\n");
     for (var id in User.clients){
-        if (User.clients[id].ws.readyState == 1)
-            User.clients[id].ws.send(JSON.stringify(res));
+        if (User.clients[id].expire < Date.now()){
+            delete User.clients[id];
+        }
+        else{
+            if (User.clients[id].ws.readyState == 1)
+                User.clients[id].ws.send(JSON.stringify(res));
+        }
     }
 }
 
