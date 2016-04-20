@@ -69,10 +69,9 @@ var player         = 1;
 var pastMoves      = Array();
 var p1;
 var p2;
-
-while (true){
-    console.log("HI");
-}
+var afk     = {};
+var players = {};
+var temp    = {};
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -322,6 +321,35 @@ function weightedRandom (){
 
 function unWeightedRandom(){
     return Math.floor(Math.random() * (User.clients.length));
+}
+
+function choosePlayers (numPlayers){
+    var rand = (User.clients.length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
+    removePlayers();                                         // Move losing players to temp array (so they aren't chosen again)
+    for (var i = 0; i < numPlayers; i++){                    // choose new players and add them to players array
+        var index = rand();
+        var key   = object.keys(User.clients)[index];
+        players[key] = User.clients[key];
+        delete User.clients[key];
+    }
+    moveTempToClients();                                    // Add losing players back to User.clients
+}
+
+function removePlayers (){
+    for (var id in players){
+        if (players[id].loser){
+            delete players[id].loser;
+            temp[id] = players[id];
+            delete players[id];
+        }
+    }
+}
+
+function moveTempToClients (){
+    for (var id in temp){
+        User.clients[id] = temp[id];
+    }
+    temp = {};
 }
 
 app.use('/', express.static(__dirname + '/public')); //route to serve static login page
