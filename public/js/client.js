@@ -1,3 +1,6 @@
+var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+// var ws = new WebSocket('ws://localhost:3000/game');
+
 var start;
 var messageRecieved = true;
 var id;
@@ -11,9 +14,6 @@ function getLeaderBoard(){
     msg.cmd = 'update leaderboard';
     ws.send(JSON.stringify(msg));
 }
-
-//var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-var ws = new WebSocket('ws://localhost:3000/game');
 
 var message = ''; //will hold response from server
 
@@ -116,9 +116,6 @@ function updateLeaderBoard(message){
         leaderboard.appendChild(new_leader);
     }
 }
-
-
-window.onload = console.log("loading");
 
 // Make the function wait until the connection is made...
 function waitForSocketConnection(socket, callback){

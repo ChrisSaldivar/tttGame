@@ -10,7 +10,7 @@ var Users = function(){
 
     Users.init    = function(ws){
         Users.db.serialize(function(){
-            Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, hash TEXT, wins INTEGER, losses INTEGER);');
+            Users.db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, hash TEXT, wins INTEGER, losses INTEGER, plays INTEGER);');
         });
         console.log('Init Done');
     };
@@ -19,15 +19,14 @@ var Users = function(){
 
     Users.add     = function(username, hash, ws){ //return true if user added false indicates username is taken
         Users.db.serialize(function(){
-            Users.db.run('INSERT INTO users (username, hash, wins, losses) VALUES (?,?,?,?);', [username, hash, 0, 0],function(err){
-                console.log("\nHASH:",hash);
+            Users.db.run('INSERT INTO users (username, hash, wins, losses, plays) VALUES (?,?,?,?,?);', [username, hash, 0, 0, 0],function(err){
                 var res = {redirect: false};
                 if (!err){
 
                     res = {
                         redirect: true, 
-                        //url: "http://chrisds.koding.io"
-                        url: "http://localhost:3000"
+                        url: "http://chrisds.koding.io"
+                        // url: "http://localhost:3000"
                     };
                 }
                 ws.send(JSON.stringify(res));
@@ -63,18 +62,19 @@ var Users = function(){
         });
     };
 
-    Users.verifyUser = function(username, password, ws, req){
+    Users.verifyUser = function(username, hash, ws){
         Users.db.serialize(function(){
             Users.db.get('SELECT * FROM users WHERE username = ?;', [username], function(err, row){
                 var res = {redirect: false, url:  ''};
                 if(row != null){
                     var user = {
-                        name: row.username,
-                        hash: row.hash,
-                        wins: row.wins,
-                        losses: row.losses
-                    }
-                    verifyPass(username, password, row.hash, row.wins, row.losses, ws, res, req);
+                        username:   username,
+                        hash:   row.hash,
+                        wins:   row.wins,
+                        losses: row.losses,
+                        plays:  row.plays
+                    };
+                    verifyPass(user, hash, ws, res);
                 }
                 else{
                     console.log("\nNOT IN TABLE",res);
@@ -96,43 +96,32 @@ var Users = function(){
                     ws.send(JSON.stringify(msg));
                     console.log("Leaderboard update sent.", msg);
                 }
-                // else{
-                //     send = false;
-                // }
             });
-            // if (send){
-            //     ws.send(JSON.stringify(msg));
-            //     console.log("Leaderboard update sent.", msg);
-            // }
         });
     };
     return Users;
 };
 
-function verifyPass (username, pass, hash, wins, losses, ws, res, req){
+function verifyPass (user, hash, ws, res){
     // Verifying a hash 
-	password(pass).verifyAgainst(hash, function(error, verified) {
+    password(hash).verifyAgainst(user.hash, function(error, verified) {
         if (error)
             console.log("error");
-		if(verified) {
+        if(verified) {
             var id = crypto.randomBytes(20).toString('hex');
             console.log("\nNew id", id);
-            Users.clients[id] = {
-                username: username,
-                ws:       ws,
-                wins:     wins,
-                loss:     losses,
-                playing:  false,
-                expire:   Date.now() + 1000*60*60 // 1 hour session
-            };
+            delete user.hash;
+            user.ws    = ws;
+            user.expire = Date.now() + 1000*60*60; // 1 hour session
+            Users.clients[id] = user;
             res.id = id;
-			res.redirect = true;
-            //res.url = 'http://chrisds.koding.io/main.html';
-             res.url = 'http://localhost:3000/main.html';
+            res.redirect = true;
+            res.url = 'http://chrisds.koding.io/main.html';
+            //  res.url = 'http://localhost:3000/main.html';
 
-		}
-		ws.send(JSON.stringify(res));
-	});
+        }
+        ws.send(JSON.stringify(res));
+    });
 }
 
 module.exports = Users;

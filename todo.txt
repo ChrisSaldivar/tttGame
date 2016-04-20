@@ -9,6 +9,7 @@ Required
 6)  add functionality so game doens't start unless both players are ready
 7)  add audio cue for new game prompt
 8)  find out how to safely include username in chat messages
+9)  FIX MULTI BROWSER LOGIN BUG
 
 
 
