@@ -29,8 +29,8 @@ app.ws('/auth', function(ws, req) { //route for checking user login
                 user.expire = Date.now() + 1000*60*60;
                 var res = { 
                     redirect: true,
-                    url:  'http://chrisds.koding.io/main.html'
-                    // url:  'http://localhost:3000/main.html'
+                    //url:  'http://chrisds.koding.io/main.html'
+                     url:  'http://localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -93,20 +93,31 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         
         // console.log("\n\nClients", User.clients);
         if (msg.cmd === 'open'){
+            var good = false;
             var user = User.clients[msg.id];
             if (user && user.expire > Date.now()){
                 delete User.clients[msg.id].ws;
                 User.clients[msg.id].ws = ws;
                 user.expire = Date.now() + 1000*60*60;
                 User.showLeaderBoard(ws);
+                good = true;
             }
             else{
                 var res = { 
                     redirect: true,
-                    url:  'http://chrisds.koding.io/index.html'
-                    // url: 'localhost:3000/index.html'
+                    // url:  'http://chrisds.koding.io/index.html'
+                    url: 'localhost:3000/index.html'
                 };
                 ws.send(JSON.stringify(res));
+            }
+
+            var msg = {
+                cmd: "hello",
+                user: User.clients[msg.id].username
+            };
+            // setTimeout(function(){ws.send(JSON.stringify(msg))}, 10000);
+            if (good){
+                ws.send(JSON.stringify(msg));
             }
             
             if (Object.keys(User.clients).length > 4){

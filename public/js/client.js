@@ -1,5 +1,5 @@
-var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-// var ws = new WebSocket('ws://localhost:3000/game');
+// var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+var ws = new WebSocket('ws://localhost:3000/game');
 
 var start;
 var messageRecieved = true;
@@ -41,6 +41,9 @@ ws.onmessage = function(event) {
         console.log("post");
         addChatMessage(message);
     }
+    else if (message.cmd === "hello"){
+        sayHello(message.user);
+    }
     else if (message.label){
         id = message.id;
         label = message.label;
@@ -74,6 +77,20 @@ function postMessage (){
         id: localStorage.getItem('id')
     };
     ws.send(JSON.stringify(msg));
+}
+
+function sayHello(message){
+    var messageList = elt("chat-list");
+    
+    var new_message = elt('message-template').content.cloneNode(true);
+    new_message.querySelector(".message-text").innerHTML = "Welcome, " + message + ": ";
+    
+    messageList.appendChild(new_message);
+    
+    if(message.value !== ""){
+        elt("chatText").focus();
+    }
+    messageList.scrollTop = messageList.scrollHeight;
 }
 
 function addChatMessage (message){
