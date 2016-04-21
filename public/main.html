@@ -13,7 +13,8 @@
 		Chat:<br/> <textArea id='chatText' type='text' name='inputtext' autofocus></textArea> <button type='button' id='chatButton' onclick="postMessage()"> Submit </button>
 	</div>
 	<section id='chat-list'>  </section>
-	<section id='leaderboard-list'></section>
+	<section id='leaderboard-list' onmouseover="showShareMessage()" onmouseout="hideShareMessage()"></section>
+	<div id = 'share' onmouseover="showShareMessage()" onmouseout="hideShareMessage()" onclick="showNumberPrompt()"><center>Click me to share your rank!</center></div>
 	<section id='donate-box'><center>Please help us keep this site going with a small donation of your choosing. <br/>Thank you in advance!!</center>
 		<div id='donatebutton'>
 			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -24,6 +25,16 @@
 			</form>
 		</div>
 	</section> 
+	<div id="number-prompt">
+		<div id="prompt"><center>Please input the desired phone number and click OK.</center></div>
+		<div id="numberBox">
+			Number (xxx)-xxx-xxxx:<br/>
+			<textArea id="numberText" type="text" autofocus></textArea>
+		</div>
+		<button type='button' id='numberAcceptButton' onclick="sendTextMessage()"> OK </button>
+		<button type='button' id='numberCancelButton' onclick="hideNumberPrompt()"> CANCEL </button>
+	</div>
+	<div id="textmessage-response"><span id="textmessage-span"></span></div>
 </body>
 <template id="message-template">
     <div class="message-wrapper">

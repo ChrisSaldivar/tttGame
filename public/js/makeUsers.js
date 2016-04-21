@@ -1,5 +1,5 @@
-var ws = new WebSocket('ws://chrisds.koding.io:3000/newUser');
-//   var ws = new WebSocket('ws://localhost:3000/newUser');
+// var ws = new WebSocket('ws://chrisds.koding.io:3000/newUser');
+  var ws = new WebSocket('ws://localhost:3000/newUser');
 
 var numUsers;
 
@@ -19,8 +19,8 @@ function makeUsers (){
 }
 
 function loginUsers(){
-    ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
-    // ws = new WebSocket('ws://localhost:3000/newUser');
+    // ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+    ws = new WebSocket('ws://localhost:3000/newUser');
     ws.onopen = function (){
         var msg = {
             cmd: "login",

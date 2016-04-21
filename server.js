@@ -127,6 +127,12 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 console.log("player2", player2);
             }
         }
+        else if (msg.cmd === 'sendTextMessage'){
+            User.sendTextMessage(msg.number, User.clients[msg.id].username, ws);
+        }
+        else if (msg.cmd === 'text message result'){
+            ws.send(msg);
+        }
         else if (msg.cmd === 'post message'){
             if (msg.value){
                 var res = {

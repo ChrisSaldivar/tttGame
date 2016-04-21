@@ -9,6 +9,35 @@ var buttons = [];
 var text;
 var canPlay = true;
 
+function showShareMessage(){
+    var share = elt("share");
+    share.style.display = 'block';
+}
+
+function hideShareMessage(){
+    var share = elt("share");
+    share.style.display = 'none';
+}
+
+function showNumberPrompt(){
+    var share = elt("number-prompt");
+    share.style.display = 'block';
+}
+
+function hideNumberPrompt(){
+    var share = elt("number-prompt");
+    share.style.display = 'none';
+}
+
+function sendTextMessage(){
+    var msg = {
+        cmd: 'sendTextMessage',
+        number: elt("numberText").value,
+        id: id
+    };
+    ws.send(JSON.stringify(msg));
+}
+
 function getLeaderBoard(){
     var msg = {};
     msg.cmd = 'update leaderboard';
@@ -19,6 +48,20 @@ var message = ''; //will hold response from server
 
 function elt(id){
     return document.getElementById(id);
+}
+
+function showTextMessageResult(msg){
+    hideNumberPrompt();
+    var div1 = elt("textmessage-response");
+    var div2 = elt("textmessage-span")
+    if (msg.success){
+        div2.innerHTML = "<center>Message Sent</center>";
+    }
+    else{
+        div2.innerHTML = "<center>Message Failed To Send</center>";
+    }   
+    div1.style.display = 'block';
+    setInterval(function(){div1.style.display = 'none'}, 1500);
 }
 
 ws.onopen = function() {
@@ -43,6 +86,9 @@ ws.onmessage = function(event) {
     }
     else if (message.cmd === "hello"){
         sayHello(message.user);
+    }
+    else if (message.cmd === 'text message result'){
+        showTextMessageResult(message);
     }
     else if (message.label){
         id = message.id;
