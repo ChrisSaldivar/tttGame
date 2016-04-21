@@ -21,7 +21,7 @@ app.ws('/auth', function(ws, req) { //route for checking user login
         msg = JSON.parse(msg);
         console.log("msg: ", msg);
         if (msg.cmd === 'login'){
-            User.verifyUser(msg.username, msg.password, ws, req);
+            User.verifyUser(msg.username, msg.password, ws);
         }
         else if (msg.cmd === 'open'){
             var user = User.clients[msg.id];
@@ -72,6 +72,7 @@ var player2;
 var afk     = {};
 var players = {};
 var temp    = {};
+var tempUsers = [];
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -108,9 +109,9 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 ws.send(JSON.stringify(res));
             }
             
-            if (Object.keys(User.clients).length > 1){
+            if (Object.keys(User.clients).length > 4){
                 choosePlayers(2);
-                console.log(players);
+                console.log("\n",players);
                 console.log("player1", player1);
                 console.log("player2", player2);
             }
@@ -321,13 +322,13 @@ function pareto(){
     highest 20%	-- 1.40%  chance of playing
 */
 function weightedRandom (){
-    User.clients.sort(compare);
+    tempUsers.sort(compare); // fix sort
     var group = pareto();
-    var range = Math.floor(Object.keys(User.clients).length * 0.20);
+    var range = Math.floor(tempUsers.length * 0.20);
     var min   = range * group;
     var max   = range * (group + 1);
     if (group == 4)
-        max = Object.keys(User.clients).length;
+        max = tempUsers.length;
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
@@ -339,20 +340,34 @@ function choosePlayers (numPlayers){
     var rand = (Object.keys(User.clients).length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
     removePlayers();                                         // Move losing players to temp array (so they aren't chosen again)
     for (var i = 0; i < numPlayers; i++){                    // choose new players and add them to players array
+        makeArray();
         var index = rand();
-        var key   = object.keys(User.clients)[index];
+        var key   = tempUsers[index].id;
         players[key] = User.clients[key];
         delete User.clients[key];
+        tempUsers = [];
     }
     moveTempToClients();                                    // Add losing players back to User.clients
     // Save keys for the 2 current players
+    // console.log("Players", players);
     var keys = Object.keys(players);
     player1  = keys[0];
     player2  = keys[1];
+    players[player1].token = 'X';
+    players[player2].token = 'O';
+}
+
+function makeArray (){
+    for (var id in User.clients){
+        var user = User.clients[id];
+        user.id = id;
+        tempUsers.push(user);
+    }
 }
 
 function removePlayers (){
     for (var id in players){
+        players[id].loser = true;
         if (players[id].loser){
             delete players[id].loser;
             temp[id] = players[id];
