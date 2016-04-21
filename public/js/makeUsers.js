@@ -20,6 +20,7 @@ function makeUsers (){
 
 function loginUsers(){
     ws = new WebSocket('ws://chrisds.koding.io:3000/auth');
+    // ws = new WebSocket('ws://localhost:3000/newUser');
     ws.onopen = function (){
         var msg = {
             cmd: "login",
