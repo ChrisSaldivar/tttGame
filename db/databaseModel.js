@@ -110,6 +110,47 @@ var Users = function(){
             });
         });
     };
+
+    Users.clockwork = require('clockwork')({key: 'f31b053fa6dc41a62becc86c82c3a91c728fe079'});
+
+    Users.sendTextMessage = function(number, username, ws){
+        Users.db.serialize(function(){
+            var msg = {};
+            msg.cmd = 'text message result';
+            var rank = 0;
+            Users.db.each('Select * FROM users ORDER BY wins DESC', function(err, row){
+                rank++;
+                if (row != null){
+                    if (row.username === username){
+                        // console.log('Rank ', rank);
+                        Users.clockwork.sendSms({To: number, Content: row.username + ' is playing Tic-Tac-Toe at [url here]! They challenge you to beat their rank (' + rank + ') in the leaderboards.'},
+                        function(err, res){
+                            if (err){
+                                msg.successful = false;
+                                console.log(err);
+                            }
+                            else{
+                                msg.successful = true;
+                                // console.log('Good');
+                                // console.log(res);
+                                if (res.SMS_Resp.ErrNo){
+                                    console.log('Error occured sending message');
+                                    msg.successful = false;
+                                }
+                            }
+                            ws.send(JSON.stringify(msg));
+                        }); 
+                    }
+                }
+                else{
+                    // console.log('not found');
+                    msg.successful = false;
+                    ws.send(JSON.stringify(msg));
+                }
+            });
+
+        });
+    };
     return Users;
 };
 
