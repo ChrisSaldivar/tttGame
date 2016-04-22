@@ -345,13 +345,27 @@ function unWeightedRandom(){
 function choosePlayers (numPlayers){
     var rand = (Object.keys(User.clients).length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
     removePlayers();                                         // Move losing players to temp array (so they aren't chosen again)
-    for (var i = 0; i < numPlayers; i++){                    // choose new players and add them to players array
+    var done = false;
+    for (var i = 0; i < numPlayers && !done; i++){                    // choose new players and add them to players array
         makeArray();
-        var index = rand();
-        var key   = tempUsers[index].id;
-        players[key] = User.clients[key];
-        delete User.clients[key];
-        tempUsers = [];
+        if (tempUsers.length > 0){
+            var index = rand();
+            var key   = tempUsers[index].id;
+            players[key] = User.clients[key];
+            delete User.clients[key];
+            tempUsers = [];
+        }
+        else{
+            if (Object.keys(players).length === 0){ // no other players to choose from
+                players = temp; // previous players get to play again
+                done = true;
+            }
+            else if (Object.keys(temp).length == 2){
+                var newPlayerId = (temp[player1].plays < temp[player2].plays) ? player1 : player2;
+                players[newPlayerId] = temp[newPlayerId];
+                delete temp[newPlayerId];
+            }
+        }
     }
     moveTempToClients();                                    // Add losing players back to User.clients
     // Save keys for the 2 current players

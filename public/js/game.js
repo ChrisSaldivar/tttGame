@@ -1,6 +1,7 @@
 var game = new Phaser.Game(700, 500, Phaser.AUTO, 'TTT', { preload: preload, create: create});
 var background;
 var gameOver = false;
+var buttons = [];
 
 function create (){
     console.log("Creating");

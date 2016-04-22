@@ -4,38 +4,8 @@ var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
 var start;
 var id;
 var label;
-var buttons = [];
 var text;
 var canPlay = false;
-
-function showShareMessage(){
-    var share = elt("share");
-    share.style.display = 'block';
-}
-
-function hideShareMessage(){
-    var share = elt("share");
-    share.style.display = 'none';
-}
-
-function showNumberPrompt(){
-    var share = elt("number-prompt");
-    share.style.display = 'block';
-}
-
-function hideNumberPrompt(){
-    var share = elt("number-prompt");
-    share.style.display = 'none';
-}
-
-function sendTextMessage(){
-    var msg = {
-        cmd: 'sendTextMessage',
-        number: elt("numberText").value,
-        id: id
-    };
-    ws.send(JSON.stringify(msg));
-}
 
 function getLeaderBoard(){
     var msg = {};
@@ -47,20 +17,6 @@ var message = ''; //will hold response from server
 
 function elt(id){
     return document.getElementById(id);
-}
-
-function showTextMessageResult(msg){
-    hideNumberPrompt();
-    var div1 = elt("textmessage-response");
-    var div2 = elt("textmessage-span")
-    if (msg.success){
-        div2.innerHTML = "<center>Message Sent</center>";
-    }
-    else{
-        div2.innerHTML = "<center>Message Failed To Send</center>";
-    }   
-    div1.style.display = 'block';
-    setInterval(function(){div1.style.display = 'none'}, 1500);
 }
 
 ws.onopen = function() {
@@ -86,22 +42,6 @@ ws.onmessage = function(event) {
     else if (message.cmd === "hello"){
         sayHello(message.user);
     }
-<<<<<<< HEAD
-=======
-    else if (message.cmd === 'text message result'){
-        showTextMessageResult(message);
-    }
-    else if (message.label){
-        id = message.id;
-        label = message.label;
-        if (message.label === 'spectator'){
-            canPlay = false;
-        }
-        if (message.gameStarted){
-            displayPastMoves(message);
-        }
-    }
->>>>>>> e6f041af45adf3051b79af425d1ee18ad56b310b
     else if(message.update){
         changeFrame(message);
         // console.log(buttons[message.buttonIndex]);
@@ -115,6 +55,9 @@ ws.onmessage = function(event) {
     }
     else if (message.canPlay){
         canPlay = true;
+    }
+    else if (message.cmd === 'text message result'){
+        showTextMessageResult(message);
     }
 
     if (message.gameStarted){
