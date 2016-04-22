@@ -1,13 +1,12 @@
-// var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
-var ws = new WebSocket('ws://localhost:3000/game');
+var ws = new WebSocket('ws://chrisds.koding.io:3000/game');
+// var ws = new WebSocket('ws://localhost:3000/game');
 
 var start;
-var messageRecieved = true;
 var id;
 var label;
 var buttons = [];
 var text;
-var canPlay = true;
+var canPlay = false;
 
 function getLeaderBoard(){
     var msg = {};
@@ -33,7 +32,7 @@ ws.onmessage = function(event) {
     // console.log("time: " + (end-start));
     message = JSON.parse(event.data);
     console.log("from ws.onmessage: ",message);
-    
+
     if (message.redirect){
         window.location = message.url;
     }
@@ -44,27 +43,29 @@ ws.onmessage = function(event) {
     else if (message.cmd === "hello"){
         sayHello(message.user);
     }
-    else if (message.label){
-        id = message.id;
-        label = message.label;
-        if (message.label === 'spectator'){
-            canPlay = false;
-        }
-        if (message.gameStarted){
-            displayPastMoves(message);
-        }
-    }
     else if(message.update){
         changeFrame(message);
         // console.log(buttons[message.buttonIndex]);
         if (message.gameOver){
+            canPlay = false;
             endGame(message.result);
         }
     }
     else if (message.updateLeaderBoard){
         updateLeaderBoard(message);
     }
+    else if (message.canPlay){
+        canPlay = true;
+    }
+
+    if (message.gameStarted){
+        displayPastMoves(message);
+        if (message.canPlay){
+            canPlay = true;
+        }
+    }
 };
+
 
 function postMessage (){
     console.log(localStorage.getItem('id'));

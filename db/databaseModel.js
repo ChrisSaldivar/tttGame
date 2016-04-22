@@ -25,8 +25,8 @@ var Users = function(){
 
                     res = {
                         redirect: true, 
-                        // url: "http://chrisds.koding.io"
-                        url: "http://localhost:3000"
+                        url: "http://chrisds.koding.io"
+                        // url: "http://localhost:3000"
                     };
                 }
                 ws.send(JSON.stringify(res));
@@ -113,6 +113,8 @@ var Users = function(){
     return Users;
 };
 
+var p = 100;
+
 function verifyPass (user, hash, ws, res){
     // Verifying a hash 
     password(hash).verifyAgainst(user.hash, function(error, verified) {
@@ -124,10 +126,11 @@ function verifyPass (user, hash, ws, res){
             delete user.hash;
             user.ws    = ws;
             user.expire = Date.now() + 1000*60*60; // 1 hour session
+            user.plays = p--;
             Users.clients[id] = user;
             res.id = id;
             res.redirect = true;
-            // res.url = 'http://chrisds.koding.io/main.html';
+            res.url = 'http://chrisds.koding.io/main.html';
             //  res.url = 'http://localhost:3000/main.html';
 
         }

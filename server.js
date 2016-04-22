@@ -8,8 +8,10 @@ var expressWs   = require('express-ws')(app); //create express websocket extensi
 var password    = require('password-hash-and-salt'); //used for hashing password
 
 
+var tempUsers = [];
 
 var gameStarted = false;
+var firstGame   = true;
 
 var User = Users();
 User.init();
@@ -29,10 +31,22 @@ app.ws('/auth', function(ws, req) { //route for checking user login
                 user.expire = Date.now() + 1000*60*60;
                 var res = { 
                     redirect: true,
-                    //url:  'http://chrisds.koding.io/main.html'
-                     url:  'http://localhost:3000/main.html'
+                    url:  'http://chrisds.koding.io/main.html'
+                    //  url:  'http://localhost:3000/main.html'
                 };
                 ws.send(JSON.stringify(res));
+            }
+        }
+        else if (msg.cmd === 'choose players'){
+            choosePlayers(2);
+            // console.log("\n",players);
+            // console.log("player1", player1);
+            // console.log("player2", player2);
+            // console.log(Object.keys(User.clients).length);
+            makeArray();
+            tempUsers.sort(compare); 
+            for (var i=0; i<tempUsers.length; i++){
+                console.log(tempUsers[i].username,"--",tempUsers[i].plays);
             }
         }
     });
@@ -62,17 +76,13 @@ app.ws('/newUser', function(ws, req) { //route for checking new user login
     
 });
 
-var currentPlayer  = {label: "player1", token: "X", id: ""};
-var previousPlayer = {label: "player2", token: "O", id: ""};
 var moveNumber     = 1;
-var player         = 1;
 var pastMoves      = Array();
 var player1;
 var player2;
 var afk     = {};
 var players = {};
 var temp    = {};
-var tempUsers = [];
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -87,10 +97,10 @@ app.ws('/game', function(ws, req) { //socket route for game requests
 
     //for game
     ws.on('message', function(msg) {
-        
+
         msg = JSON.parse(msg);
         console.log(msg);
-        
+
         // console.log("\n\nClients", User.clients);
         if (msg.cmd === 'open'){
             var good = false;
@@ -103,35 +113,47 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 good = true;
             }
             else{
-                var res = { 
+                var res = {
                     redirect: true,
-                    // url:  'http://chrisds.koding.io/index.html'
-                    url: 'localhost:3000/index.html'
+                    url:  'http://chrisds.koding.io/index.html'
+                    // url: 'localhost:3000/index.html'
                 };
                 ws.send(JSON.stringify(res));
             }
 
-            var msg = {
-                cmd: "hello",
-                user: User.clients[msg.id].username
-            };
-            // setTimeout(function(){ws.send(JSON.stringify(msg))}, 10000);
             if (good){
-                ws.send(JSON.stringify(msg));
+                var res = {
+                    cmd: "hello",
+                    user: User.clients[msg.id].username
+                };
+                ws.send(JSON.stringify(res));
             }
-            
-            if (Object.keys(User.clients).length > 4){
-                choosePlayers(2);
-                console.log("\n",players);
-                console.log("player1", player1);
-                console.log("player2", player2);
+            if (gameStarted){
+                var res = {
+                    pastMoves   : pastMoves,
+                    gameStarted : gameStarted,
+                };
+                if (players[msg.id]){     // if a current player reloads/new tab etc.
+                    res.canPlay = true;
+                }
+                ws.send(JSON.stringify(res));
+            }
+            if (Object.keys(User.clients).length > 1 && firstGame){
+                startGame();
             }
         }
         else if (msg.cmd === 'post message'){
             if (msg.value){
+                var username;
+                if (User.clients[msg.id]){
+                    username = User.clients[msg.id].username;
+                }
+                else if (players[msg.id]){
+                    username = players[msg.id].username;
+                }
                 var res = {
                     value: msg.value,
-                    senderName: User.clients[msg.id].username
+                    senderName: username
                 };
                 console.log("post message",res);
                 broadcast(res);
@@ -142,49 +164,8 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         }
         else if (msg.status){
             console.log("Status: " + msg.status);
-            
-            
-            // if (msg.firstConnection){
-            //     var id = randomString();
-            //     if (player < 3){
-            //         var firstConnectRes = {label: "player" + player++, id: id};
-            //         if (player == 2){
-            //             console.log("in here");
-            //             p1 = ws;
-            //             currentPlayer.id = id;
-            //         }
-            //         else if (player == 3){
-            //             p2 = ws;
-            //             previousPlayer.id = id;
-            //         }
-            //         console.log(firstConnectRes.label, "has joined");
-            //         ws.send(JSON.stringify(firstConnectRes));
-            //     }
-            //     else{
-            //         var spectatorRes = {label: "spectator", id: id};
-            //         console.log(spectatorRes.label,"has joined");
-            //         if (gameStarted){
-            //             spectatorRes.pastMoves   = pastMoves;
-            //             spectatorRes.gameStarted = gameStarted;
-            //         }
-            //         ws.send(JSON.stringify(spectatorRes));
-            //     }
-            //     User.clients[id] = ws;
-            // }
         }
         else if (msg.cmd === 'play move'){
-            
-            /*
-            
-                choose 2 players
-                move the 2 players from User.clients to players[]
-                players = [player1, player2]
-                currentPlayer = 0
-                if (user == players[currentPlayer])
-                    play move
-                        currentPlayer = (currentPlayer === 0) ? 1 : 0;
-            
-            */
             var res = {
                 buttonIndex: -1,
                 update:      false,
@@ -195,22 +176,30 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             buttonRow    = msg.row;
             buttonCol    = msg.col;
             index        = buttonRow * 3 + buttonCol;
-            
+
             // Attempt to play the move
-            if (msg.playerLabel === currentPlayer.label && ttt.playMove(buttonRow, buttonCol, currentPlayer.token)){
-                playMove(index, res);
+            var currToken = (moveNumber % 2 !== 0) ? 'X' : 'O';
+            if (currentPlayer(msg.id, currToken) && ttt.playMove(buttonRow, buttonCol, currToken)){
+                playMove(index, res, currToken);
             }
             // Check if game is over and report results
             if (res.update){
                 checkGameOver(res);
             }
-            
+
             console.log(ttt.toString());
-            
+
             broadcast(res);
         }
     });
 });
+
+function currentPlayer (id, currToken){
+    if (players[id] && players[id].token === currToken){
+        return true;
+    }
+    return false;
+}
 
 function removeUser (){
     var id;
@@ -221,16 +210,13 @@ function removeUser (){
     }
 }
 
-function playMove (index, res){
+function playMove (index, res, currToken){
     gameStarted = true;
     res.buttonIndex = index;
-    var frame = (currentPlayer.token === "X") ? 1 : 2;
+    var frame = (currToken === "X") ? 1 : 2;
     pastMoves.push(new Move(frame, index));
     res.update = true;
     res.buttonFrame = frame;
-    var temp = currentPlayer;
-    currentPlayer = previousPlayer;
-    previousPlayer = temp;
     moveNumber++;
 }
 
@@ -282,14 +268,17 @@ function broadcast (res){
                 User.clients[id].ws.send(JSON.stringify(res));
         }
     }
+    for (var id in players){
+        if (players[id].ws.readyState == 1)
+                players[id].ws.send(JSON.stringify(res));
+    }
 }
 
 function reset(){
     moveNumber     = 1;
-    currentPlayer  = {label: "player1", token: "X"};
-    previousPlayer = {label: "player2", token: "O"};
     gameStarted    = false;
     pastMoves      = Array();
+    // choosePlayers(2);
     ttt.reset();
 }
 
@@ -333,7 +322,7 @@ function pareto(){
     highest 20%	-- 1.40%  chance of playing
 */
 function weightedRandom (){
-    tempUsers.sort(compare); // fix sort
+    tempUsers.sort(compare); 
     var group = pareto();
     var range = Math.floor(tempUsers.length * 0.20);
     var min   = range * group;
@@ -366,6 +355,18 @@ function choosePlayers (numPlayers){
     player2  = keys[1];
     players[player1].token = 'X';
     players[player2].token = 'O';
+}
+
+
+function startGame(){
+    choosePlayers(2);
+    for (var id in players){
+        if (players[id].ws.readyState == 1){
+            console.log("player");
+            var msg = {canPlay: true};
+            players[id].ws.send(JSON.stringify(msg));
+        }
+    }
 }
 
 function makeArray (){

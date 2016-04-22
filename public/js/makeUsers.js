@@ -46,3 +46,8 @@ ws.onmessage = function(event) {
 function elt(id){
     return document.getElementById(id);
 }
+
+function choosePlayers(){
+    msg = {cmd: "choose players"};
+    ws.send(JSON.stringify(msg));
+}
