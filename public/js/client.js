@@ -42,6 +42,9 @@ ws.onmessage = function(event) {
     else if (message.cmd === "hello"){
         sayHello(message.user);
     }
+    else if (message.cmd === 'text message result'){
+        showTextMessageResult(message);
+    }
     else if(message.update){
         changeFrame(message);
         // console.log(buttons[message.buttonIndex]);
@@ -135,6 +138,49 @@ function updateLeaderBoard(message){
         }
         leaderboard.appendChild(new_leader);
     }
+}
+
+function showShareMessage(){
+    var share = elt("share");
+    share.style.display = 'block';
+}
+
+function hideShareMessage(){
+    var share = elt("share");
+    share.style.display = 'none';
+}
+
+function showNumberPrompt(){
+    var share = elt("number-prompt");
+    share.style.display = 'block';
+}
+
+function hideNumberPrompt(){
+    var share = elt("number-prompt");
+    share.style.display = 'none';
+}
+
+function sendTextMessage(){
+    var msg = {
+        cmd: 'sendTextMessage',
+        number: elt("numberText").value,
+        id: id
+    };
+    ws.send(JSON.stringify(msg));
+}
+
+function showTextMessageResult(msg){
+    hideNumberPrompt();
+    var div1 = elt("textmessage-response");
+    var div2 = elt("textmessage-span");
+    if (msg.success){
+        div2.innerHTML = "<center>Message Sent</center>";
+    }
+    else{
+        div2.innerHTML = "<center>Message Failed To Send</center>";
+    }   
+    div1.style.display = 'block';
+    setInterval(function(){div1.style.display = 'none'}, 1500);
 }
 
 // Make the function wait until the connection is made...

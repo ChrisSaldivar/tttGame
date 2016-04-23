@@ -151,10 +151,49 @@ var Users = function(){
 
         });
     };
+    Users.clockwork = require('clockwork')({key: '197e2734752727dda910008f227a0358f161bff5'});
+
+    Users.sendTextMessage = function(number, username, ws){
+        Users.db.serialize(function(){
+            var msg = {};
+            msg.cmd = 'text message result';
+            var rank = 0;
+            Users.db.each('Select * FROM users ORDER BY wins DESC', function(err, row){
+                rank++;
+                if (row != null){
+                    if (row.username === username){
+                        // console.log('Rank ', rank);
+                        Users.clockwork.sendSms({To: number, Content: row.username + ' is playing Tic-Tac-Toe at [url here]! They challenge you to beat their rank (' + rank + ') in the leaderboards.'},
+                        function(err, res){
+                            if (err){
+                                msg.successful = false;
+                                console.log(err);
+                            }
+                            else{
+                                msg.successful = true;
+                                // console.log('Good');
+                                // console.log(res);
+                                if (res.SMS_Resp.ErrNo){
+                                    console.log('Error occured sending message');
+                                    msg.successful = false;
+                                }
+                            }
+                            ws.send(JSON.stringify(msg));
+                        }); 
+                    }
+                }
+                else{
+                    // console.log('not found');
+                    msg.successful = false;
+                    ws.send(JSON.stringify(msg));
+                }
+            });
+
+        });
+    };
     return Users;
 };
 
-var p = 100;
 
 function verifyPass (user, hash, ws, res){
     // Verifying a hash 
@@ -167,7 +206,6 @@ function verifyPass (user, hash, ws, res){
             delete user.hash;
             user.ws    = ws;
             user.expire = Date.now() + 1000*60*60; // 1 hour session
-            user.plays = p--;
             Users.clients[id] = user;
             res.id = id;
             res.redirect = true;

@@ -280,11 +280,20 @@ function broadcast (res){
     }
 }
 
+function sendText (id, text){
+    if (User.clients[id] && User.clients[id].expire > Date.now()){
+        // you can use User.clients[id].username
+    }
+    else if (players[id] && players[id].expire > Date.now()){
+        // players[id].username
+    }
+}
+
 function reset(){
     moveNumber     = 1;
     gameStarted    = false;
     pastMoves      = Array();
-    // choosePlayers(2);
+    choosePlayers(2);
     ttt.reset();
 }
 
