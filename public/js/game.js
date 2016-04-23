@@ -7,7 +7,7 @@ function create (){
     console.log("Creating");
     gameOver = false;
     background = game.add.tileSprite(0, 0, 700, 500, 'background');
-    
+    buttons = Array();
     generateButtons();
 
 }
@@ -21,6 +21,8 @@ function generateButtons(){
     var button;
     var x = 150;
     var y = 75;
+    gameOver = false;
+    buttons = Array();
     for (var i = 0; i < 3; i++){
         for (var j=0; j<3; j++){
             button = game.add.button(x, y, 'button', actionOnClick, this);
@@ -35,6 +37,7 @@ function generateButtons(){
 }
 
 function actionOnClick(button){
+    console.log(canPlay);
     if (!gameOver && canPlay){
         var msg = {cmd: 'play move', row: button.row, col: button.col, id: id};
         // start = window.performance.now();
@@ -63,7 +66,6 @@ function displayPastMoves(message){
 }
 
 function reset(){
-    buttons = Array();
     getLeaderBoard();
     create();
 }

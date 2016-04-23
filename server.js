@@ -206,6 +206,16 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             console.log(ttt.toString());
 
             broadcast(res);
+            
+            if (res.gameOver){
+                /*
+                    player1.plays++;
+                    player2.plays++;
+                    updateWinsandLosses(player1.name, player1.wins, player1.loses, player1.plays);
+                    updateWinsandLosses(player1.name, player2.wins, player2.loses, player2.plays);
+                */
+                reset();
+            }
         }
     });
 });
@@ -262,15 +272,6 @@ function checkGameOver (res){
         res.result = 'Winner is: ' + winner;
         res.gameOver = true;
     }
-    if (res.gameOver){
-        /*
-            player1.plays++;
-            player2.plays++;
-            updateWinsandLosses(player1.name, player1.wins, player1.loses, player1.plays);
-            updateWinsandLosses(player1.name, player2.wins, player2.loses, player2.plays);
-        */
-        reset();
-    }
 }
 
 function broadcast (res){
@@ -304,6 +305,7 @@ function reset(){
     gameStarted    = false;
     pastMoves      = Array();
     choosePlayers(2);
+    ttt.reset();
 }
 
 // Sort clients based on times played 
@@ -394,11 +396,16 @@ function choosePlayers (numPlayers){
     players[player1].token = 'X';
     players[player2].token = 'O';
     console.log(players);
+    promptPlayers();
 }
 
 
 function startGame(){
+    firstGame = false;
     choosePlayers(2);
+}
+
+function promptPlayers(){
     for (var id in players){
         if (players[id].ws.readyState == 1){
             console.log("player");
@@ -414,6 +421,7 @@ function makeArray (){
         user.id = id;
         tempUsers.push(user);
     }
+    console.log("tempusers:",tempUsers,"\n\n");
 }
 
 function removePlayers (){
