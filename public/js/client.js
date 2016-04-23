@@ -30,7 +30,8 @@ ws.onmessage = function(event) {
     // var end = window.performance.now();
     // console.log("time: " + (end-start));
     message = JSON.parse(event.data);
-    console.log("from ws.onmessage: ",message);
+    if (!message.updateLeaderBoard)
+        console.log("from ws.onmessage: ",message);
 
     if (message.redirect){
         window.location = message.url;

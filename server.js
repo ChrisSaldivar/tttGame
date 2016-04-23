@@ -105,11 +105,21 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         if (msg.cmd === 'open'){
             var good = false;
             var user = User.clients[msg.id];
+            var player = players[msg.id];
             if (user && user.expire > Date.now()){
-                delete User.clients[msg.id].ws;
-                User.clients[msg.id].ws = ws;
+                delete user.ws;
+                user.ws = ws;
                 user.expire = Date.now() + 1000*60*60;
                 User.showLeaderBoard(ws);
+                good = true;
+            }
+            else if (player && player.expire > Date.now()){
+                delete player.ws;
+                player.ws = ws;
+                player.expire = Date.now() + 1000*60*60;
+                User.showLeaderBoard(ws);
+                res = {canPlay: true};
+                ws.send(JSON.stringify(res));
                 good = true;
             }
             else{
@@ -124,7 +134,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             if (good){
                 var res = {
                     cmd: "hello",
-                    user: User.clients[msg.id].username
+                    user: (user) ? user.username : player.username
                 };
                 ws.send(JSON.stringify(res));
             }
@@ -294,7 +304,6 @@ function reset(){
     gameStarted    = false;
     pastMoves      = Array();
     choosePlayers(2);
-    ttt.reset();
 }
 
 // Sort clients based on times played 
@@ -384,6 +393,7 @@ function choosePlayers (numPlayers){
     player2  = keys[1];
     players[player1].token = 'X';
     players[player2].token = 'O';
+    console.log(players);
 }
 
 
