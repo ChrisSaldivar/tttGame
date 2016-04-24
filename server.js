@@ -21,7 +21,7 @@ app.ws('/auth', function(ws, req) { //route for checking user login
     //check for valid login
     ws.on('message', function(msg){
         msg = JSON.parse(msg);
-        console.log("msg: ", msg);
+        // console.log("msg: ", msg);
         if (msg.cmd === 'login'){
             User.verifyUser(msg.username, msg.password, ws);
         }
@@ -57,7 +57,7 @@ app.ws('/newUser', function(ws, req) { //route for checking new user login
     
     // Register new user
     ws.on('message', function(msg){
-        console.log(msg);
+        // console.log(msg);
         msg = JSON.parse(msg);
         
         if (msg.cmd === 'register'){
@@ -83,6 +83,8 @@ var player2;
 var afk     = {};
 var players = {};
 var temp    = {};
+var timeOut;
+var timeOutSet = false;
 
 function Move (frame, index){
     this.buttonFrame = frame;
@@ -99,7 +101,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
     ws.on('message', function(msg) {
 
         msg = JSON.parse(msg);
-        console.log(msg);
+        // console.log(msg);
 
         // console.log("\n\nClients", User.clients);
         if (msg.cmd === 'open'){
@@ -171,7 +173,6 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                     value: msg.value,
                     senderName: username
                 };
-                console.log("post message",res);
                 broadcast(res);
             }
         }
@@ -180,6 +181,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
         }
         else if (msg.status){
             console.log("Status: " + msg.status);
+        }
+        else if (msg.outOfTime){
+            clearTimeout(timeOut);
+            timeOutSet = false;
+            timeLimit();
         }
         else if (msg.cmd === 'play move'){
             var res = {
@@ -196,7 +202,11 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             // Attempt to play the move
             var currToken = (moveNumber % 2 !== 0) ? 'X' : 'O';
             if (currentPlayer(msg.id, currToken) && ttt.playMove(buttonRow, buttonCol, currToken)){
-                playMove(index, res, currToken);
+                if (timeOutSet){
+                    clearTimeout(timeOut);
+                    timeOutSet = false;
+                    playMove(index, res, currToken);
+                }
             }
             // Check if game is over and report results
             if (res.update){
@@ -217,8 +227,38 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 reset();
             }
         }
+        if (gameStarted && !timeOutSet){
+            nextMove();
+        }
     });
 });
+
+function nextMove (){
+    if (Object.keys(players).length > 1){
+        var player = (moveNumber % 2 !== 0) ? players[player1] : players[player2];
+        timeOutSet = true;
+        console.log('set');
+        timeOut = setTimeout(timeLimit,12000);
+        var res = {
+            timer: true
+        };
+        player.ws.send(JSON.stringify(res));
+    }
+}
+
+function timeLimit (){
+    var player = (moveNumber % 2 !== 0) ? players[player1] : players[player2];
+    var token = (player.token === 'X') ? 'O' : 'X';
+    var res = {
+        update:   true,
+        gameOver: true,
+        result:   'Winner is ' + token
+    };
+    broadcast(res);
+    player.loser = true;
+    console.log('timeLimit');
+    reset();
+}
 
 function currentPlayer (id, currToken){
     if (players[id] && players[id].token === currToken){
@@ -237,7 +277,6 @@ function removeUser (){
 }
 
 function playMove (index, res, currToken){
-    gameStarted = true;
     res.buttonIndex = index;
     var frame = (currToken === "X") ? 1 : 2;
     pastMoves.push(new Move(frame, index));
@@ -305,6 +344,9 @@ function reset(){
     gameStarted    = false;
     pastMoves      = Array();
     choosePlayers(2);
+    nextMove();
+    gameStarted = true;
+    console.log('reset called');
     ttt.reset();
 }
 
@@ -395,13 +437,14 @@ function choosePlayers (numPlayers){
     player2  = keys[1];
     players[player1].token = 'X';
     players[player2].token = 'O';
-    console.log(players);
+    // console.log(players);
     promptPlayers();
 }
 
 
 function startGame(){
     firstGame = false;
+    gameStarted = true;
     choosePlayers(2);
 }
 
@@ -421,7 +464,6 @@ function makeArray (){
         user.id = id;
         tempUsers.push(user);
     }
-    console.log("tempusers:",tempUsers,"\n\n");
 }
 
 function removePlayers (){

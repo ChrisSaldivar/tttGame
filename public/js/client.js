@@ -6,6 +6,8 @@ var id;
 var label;
 var text;
 var canPlay = false;
+var seconds = 10;
+var interval;
 
 function getLeaderBoard(){
     var msg = {};
@@ -60,10 +62,9 @@ ws.onmessage = function(event) {
     else if (message.canPlay){
         canPlay = true;
     }
-    else if (message.cmd === 'text message result'){
-        showTextMessageResult(message);
+    if (message.timer){
+        interval = setInterval(timer, 1000);
     }
-
     if (message.gameStarted){
         displayPastMoves(message);
         if (message.canPlay){
@@ -72,6 +73,14 @@ ws.onmessage = function(event) {
     }
 };
 
+function timer (){
+    updateTime();
+    if (seconds < 0){
+        clearInterval(interval);
+        ws.send(JSON.stringify({outOfTime: true}));
+        seconds = 10;
+    }
+}
 
 function postMessage (){
     console.log(localStorage.getItem('id'));
