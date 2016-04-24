@@ -38,7 +38,7 @@ app.ws('/auth', function(ws, req) { //route for checking user login
             }
         }
         else if (msg.cmd === 'choose players'){
-            choosePlayers(2);
+            choosePlayers();
             // console.log("\n",players);
             // console.log("player1", player1);
             // console.log("player2", player2);
@@ -213,7 +213,7 @@ app.ws('/game', function(ws, req) { //socket route for game requests
                 checkGameOver(res);
             }
 
-            console.log(ttt.toString());
+            // console.log(ttt.toString());
 
             broadcast(res);
             
@@ -283,7 +283,6 @@ function checkGameOver (res){
     var winner = ttt.checkWin();
     if (winner === "" && moveNumber == 10){
         for (var id in players){
-            players[id].losses++;
             players[id].loser = true;
         }
         res.result   = 'It\'s a tie';
@@ -291,14 +290,14 @@ function checkGameOver (res){
     }
     else if (winner !== ""){
         if (winner === 'X'){
-            players[player1].wins++;
-            players[player2].losses++;
             players[player2].loser = true;
+            console.log('\n\n',players[player1].username + ' won');
+            console.log(players[player2].username + ' lost');
         }
         else{
-            players[player2].wins++;
-            players[player1].losses++;
             players[player1].loser = true;
+            console.log('\n\n',players[player1].username + ' won');
+            console.log(players[player2].username + ' lost');
         }
         res.result = 'Winner is: ' + winner;
         res.gameOver = true;
@@ -333,13 +332,19 @@ function sendText (id, text){
 
 function reset(){
     for (var id in players){
+        if (players[id].loser){
+            players[id].losses++;
+        }
+        else{
+            players[id].wins++;
+        }
         players[id].plays++;
         User.updatePlayer(players[id]);
     }
     moveNumber     = 1;
     gameStarted    = false;
     pastMoves      = Array();
-    choosePlayers(2);
+    choosePlayers();
     nextMove();
     gameStarted = true;
     console.log('reset called');
@@ -400,13 +405,16 @@ function unWeightedRandom(){
     return Math.floor(Math.random() * (Object.keys(User.clients).length));
 }
 
-function choosePlayers (numPlayers){
+function choosePlayers (){
     var rand = (Object.keys(User.clients).length < 5) ? unWeightedRandom : weightedRandom; // weightedRandom only works with 5+ indices
     removePlayers();                                         // Move losing players to temp array (so they aren't chosen again)
+    var numPlayers = 2 - Object.keys(players).length;
+    console.log('\n\n there are players',numPlayers);
     var done = false;
     for (var i = 0; i < numPlayers && !done; i++){                    // choose new players and add them to players array
         makeArray();
         if (tempUsers.length > 0){
+            console.log('there are clients');
             var index = rand();
             var key   = tempUsers[index].id;
             players[key] = User.clients[key];
@@ -414,20 +422,24 @@ function choosePlayers (numPlayers){
             tempUsers = [];
         }
         else{
+            console.log('no clients');
             if (Object.keys(players).length === 0){ // no other players to choose from
                 players = temp; // previous players get to play again
                 done = true;
             }
-            else if (Object.keys(temp).length == 2){
-                var newPlayerId = (temp[player1].plays < temp[player2].plays) ? player1 : player2;
+            else{
+                console.log('hi');
+                var newPlayerId = Object.keys(temp)[0];
                 players[newPlayerId] = temp[newPlayerId];
                 delete temp[newPlayerId];
+                done = true;
             }
         }
     }
     moveTempToClients();                                    // Add losing players back to User.clients
     // Save keys for the 2 current players
-    // console.log("Players", players);
+    console.log("Players");
+    print(players);
     var keys = Object.keys(players);
     player1  = keys[0];
     player2  = keys[1];
@@ -437,11 +449,19 @@ function choosePlayers (numPlayers){
     promptPlayers();
 }
 
+function print (list){
+    for (var id in list){
+        var socket = list[id].ws;
+        delete list[id].ws;
+        console.log(list[id]);
+        list[id].ws = socket;
+    }
+}
 
 function startGame(){
     firstGame = false;
     gameStarted = true;
-    choosePlayers(2);
+    choosePlayers();
 }
 
 function promptPlayers(){
@@ -464,7 +484,6 @@ function makeArray (){
 
 function removePlayers (){
     for (var id in players){
-        players[id].loser = true;
         if (players[id].loser){
             delete players[id].loser;
             temp[id] = players[id];

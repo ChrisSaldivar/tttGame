@@ -55,7 +55,7 @@ function endGame(message){
     clearInterval(interval);
     gameOver = true;
     text = game.add.text(game.world.centerX, game.world.centerY, message, { font: "65px Arial", fill: "#ff0044", align: "center" });
-    setTimeout(reset, 2000);
+    setTimeout(reset, 1000);
 }
 
 function updateTime(){
