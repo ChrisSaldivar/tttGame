@@ -218,12 +218,6 @@ app.ws('/game', function(ws, req) { //socket route for game requests
             broadcast(res);
             
             if (res.gameOver){
-                /*
-                    player1.plays++;
-                    player2.plays++;
-                    updateWinsandLosses(player1.name, player1.wins, player1.loses, player1.plays);
-                    updateWinsandLosses(player1.name, player2.wins, player2.loses, player2.plays);
-                */
                 reset();
             }
         }
@@ -287,27 +281,25 @@ function playMove (index, res, currToken){
 
 function checkGameOver (res){
     var winner = ttt.checkWin();
-    // var player1 = players[0];
-    // var player2 = players[1];
     if (winner === "" && moveNumber == 10){
-        /*
-            player1.losses++;
-            player2.losses++;
-        */
+        for (var id in players){
+            players[id].losses++;
+            players[id].loser = true;
+        }
         res.result   = 'It\'s a tie';
         res.gameOver = true;
     }
     else if (winner !== ""){
-        /*
-            if (winner === 'X'){
-                player1.wins++;
-                player2.losses++;
-            }
-            else{
-                player2.wins++;
-                player1.losses++;
-            }
-        */
+        if (winner === 'X'){
+            players[player1].wins++;
+            players[player2].losses++;
+            players[player2].loser = true;
+        }
+        else{
+            players[player2].wins++;
+            players[player1].losses++;
+            players[player1].loser = true;
+        }
         res.result = 'Winner is: ' + winner;
         res.gameOver = true;
     }
@@ -340,6 +332,10 @@ function sendText (id, text){
 }
 
 function reset(){
+    for (var id in players){
+        players[id].plays++;
+        User.updatePlayer(players[id]);
+    }
     moveNumber     = 1;
     gameStarted    = false;
     pastMoves      = Array();
