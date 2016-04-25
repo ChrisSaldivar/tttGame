@@ -1,8 +1,6 @@
 
 Right now-right now
 -------------------------------
-3)  add prompt for player
-4)  add move timer
 7)  add audio cue for new game prompt
 9)  FIX MULTI BROWSER LOGIN BUG
 

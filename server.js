@@ -261,14 +261,14 @@ function currentPlayer (id, currToken){
     return false;
 }
 
-function removeUser (){
-    var id;
-    for (id in User.clients){
-        if (User.clients[id].ws.readyState == 3){
+// function removeUser (){
+//     var id;
+//     for (id in User.clients){
+//         if (User.clients[id].ws.readyState == 3){
             
-        }
-    }
-}
+//         }
+//     }
+// }
 
 function playMove (index, res, currToken){
     res.buttonIndex = index;
@@ -347,7 +347,6 @@ function reset(){
     choosePlayers();
     nextMove();
     gameStarted = true;
-    console.log('reset called');
     ttt.reset();
 }
 
@@ -438,8 +437,8 @@ function choosePlayers (){
     }
     moveTempToClients();                                    // Add losing players back to User.clients
     // Save keys for the 2 current players
-    console.log("Players");
-    print(players);
+    // console.log("Players");
+    // print(players);
     var keys = Object.keys(players);
     player1  = keys[0];
     player2  = keys[1];

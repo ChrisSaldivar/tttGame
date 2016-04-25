@@ -32,14 +32,13 @@ ws.onmessage = function(event) {
     // var end = window.performance.now();
     // console.log("time: " + (end-start));
     message = JSON.parse(event.data);
-    if (!message.updateLeaderBoard)
+    if (message.updateLeaderBoard)
         console.log("from ws.onmessage: ",message);
 
     if (message.redirect){
         window.location = message.url;
     }
     else if (message.value){
-        console.log("post");
         addChatMessage(message);
     }
     else if (message.cmd === "hello"){
@@ -49,6 +48,9 @@ ws.onmessage = function(event) {
         showTextMessageResult(message);
     }
     else if(message.update){
+        clearInterval(interval);
+        seconds = 10;
+        time.setText('');
         changeFrame(message);
         // console.log(buttons[message.buttonIndex]);
         if (message.gameOver){
@@ -125,22 +127,21 @@ function addChatMessage (message){
 
 function updateLeaderBoard(message){
     var leaderboard = elt("leaderboard-list");
-
-
+    
     while(leaderboard.firstChild){ //clear old leader board
         leaderboard.removeChild(leaderboard.firstChild);
     }
-    for (var i = 0; i < 11; i++){
+    for (var i = 0; i < message.board.length+1; i++){
         var new_leader = elt('leaderboard-template').content.cloneNode(true);
         if (i === 0){
             new_leader.querySelector(".leaderboard-text").innerHTML = '<center id=center1><strong>Leaderboard</strong></center><br/>';
         }
-        else if (message[i]){
+        else if (message.board[i-1]){
             if (i === 10){
-                new_leader.querySelector(".leaderboard-text").innerHTML = i + "." + '<center id=center2>' + message[i] + '</center>';
+                new_leader.querySelector(".leaderboard-text").innerHTML = i + "." + '<center id=center2>' + message.board[i-1].name + '-' + message.board[i-1].wins + '</center>';
             }
             else{
-                new_leader.querySelector(".leaderboard-text").innerHTML = i + ". &nbsp" + '<center id=center2>' + message[i] + '</center>';
+                new_leader.querySelector(".leaderboard-text").innerHTML = i + ". &nbsp" + '<center id=center2>' + message.board[i-1].name + '-' + message.board[i-1].wins + '</center>';
             }
         }
         else{

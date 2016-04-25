@@ -40,9 +40,6 @@ function generateButtons(){
 
 function actionOnClick(button){
     if (!gameOver && canPlay){
-        clearInterval(interval);
-        seconds = 10;
-        time.setText('');
         var msg = {cmd: 'play move', row: button.row, col: button.col, id: id};
         // start = window.performance.now();
         waitForSocketConnection(ws, function() {ws.send(JSON.stringify(msg))});
